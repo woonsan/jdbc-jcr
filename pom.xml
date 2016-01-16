@@ -30,12 +30,12 @@
 
   <properties>
 
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javaVersion>1.8</javaVersion>
+    <javaVersion>1.7</javaVersion>
 
-    <lib.junit.version>4.8.2</lib.junit.version>
-    <lib.slf4j.version>1.7.6</lib.slf4j.version>
-    <lib.log4j.version>1.2.17</lib.log4j.version>
+    <jcr.version>2.0</jcr.version>
+    <jackrabbit.version>2.10.1</jackrabbit.version>
+
+    <junit.version>4.8.2</junit.version>
 
     <maven-source-plugin.version>2.4</maven-source-plugin.version>
     <maven-javadoc-plugin.version>2.10.2</maven-javadoc-plugin.version>
@@ -70,37 +70,23 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${lib.slf4j.version}</version>
+      <groupId>javax.jcr</groupId>
+      <artifactId>jcr</artifactId>
+      <version>${jcr.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${lib.slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <version>${lib.slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>${lib.log4j.version}</version>
-      <scope>test</scope>
+      <groupId>org.apache.jackrabbit</groupId>
+      <artifactId>jackrabbit-jcr2dav</artifactId>
+      <version>${jackrabbit.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${lib.junit.version}</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 

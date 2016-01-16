@@ -16,13 +16,94 @@
  */
 package com.github.woonsan.jdbc.jcr;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.sql.Connection;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.Properties;
+
+import org.junit.Before;
 import org.junit.Test;
+
+import com.github.woonsan.jdbc.Constants;
 
 public class DriverTest {
 
+    private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:http://localhost:8080/server/";
+
+    private java.sql.Driver jdbcDriver;
+
+    @Before
+    public void setUp() throws Exception {
+        jdbcDriver = new Driver();
+    }
+
     @Test
-    public void testDriver() throws Exception {
-        
+    public void testVersion() throws Exception {
+        assertEquals(Constants.MAJOR_VERSION, jdbcDriver.getMajorVersion());
+        assertEquals(Constants.MINOR_VERSION, jdbcDriver.getMinorVersion());
+    }
+
+    @Test
+    public void testJdbcCompliant() throws Exception {
+        assertFalse(jdbcDriver.jdbcCompliant());
+    }
+
+    @Test
+    public void testAcceptsURL() throws Exception {
+        assertFalse(jdbcDriver.acceptsURL("jdbc:h2:test"));
+        assertTrue(jdbcDriver.acceptsURL(DEFAULT_LOCAL_SERVER_JDBC_URL));
+    }
+
+    @Test
+    public void testGetPropertyInfo() throws Exception {
+        Properties info = new Properties();
+        DriverPropertyInfo[] propInfos = jdbcDriver.getPropertyInfo(DEFAULT_LOCAL_SERVER_JDBC_URL, info);
+        assertNotNull(propInfos);
+    }
+
+    @Test
+    public void testGetParentLogger() throws Exception {
+        try {
+            jdbcDriver.getParentLogger();
+            fail();
+        } catch (SQLFeatureNotSupportedException e) {
+            // good...
+        }
+    }
+
+    @Test
+    public void testConnectByInfo() throws Exception {
+        Properties info = new Properties();
+        info.setProperty("username", "admin");
+        info.setProperty("password", "admin");
+
+        Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL, info);
+        assertFalse(conn.isClosed());
+        assertEquals("admin", conn.getClientInfo("userID"));
+        assertTrue(conn.isReadOnly());
+
+        conn.close();
+        assertTrue(conn.isClosed());
+    }
+
+    @Test
+    public void testConnectByParams() throws Exception {
+        String params = "?username=admin&password=admin";
+
+        Properties info = new Properties();
+        Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL + params, info);
+        assertFalse(conn.isClosed());
+        assertEquals("admin", conn.getClientInfo("userID"));
+        assertTrue(conn.isReadOnly());
+
+        conn.close();
+        assertTrue(conn.isClosed());
     }
 
 }

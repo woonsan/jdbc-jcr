@@ -16,38 +16,99 @@
  */
 package com.github.woonsan.jdbc.jcr;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import javax.jcr.Credentials;
+import javax.jcr.Repository;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.SimpleCredentials;
+
+import org.apache.jackrabbit.jcr2dav.Jcr2davRepositoryFactory;
+import org.apache.jackrabbit.spi2davex.Spi2davexRepositoryServiceFactory;
+
+import com.github.woonsan.jdbc.Constants;
+import com.github.woonsan.jdbc.jcr.impl.JcrJdbcConnection;
+
 public class Driver implements java.sql.Driver {
+
+    protected static final String JDBC_JCR_URL_PREFIX = "jdbc:jcr:";
+
+    protected static final String CONNECTION_PROP_LOCATION = "LOCATION";
+
+    protected static final String CONNECTION_PROP_USERNAME = "USERNAME";
+
+    protected static final String CONNECTION_PROP_PASSWORD = "PASSWORD";
+
+    protected static final String CONNECTION_PROP_WORKSPACE = "WORKSPACE";
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
-        return null;
+        final Properties connProps = readConnectionProperties(url, info);
+
+        final String username = connProps.getProperty(CONNECTION_PROP_USERNAME);
+        final String password = connProps.getProperty(CONNECTION_PROP_PASSWORD) != null
+                ? connProps.getProperty(CONNECTION_PROP_PASSWORD) : "";
+        final String workspace = connProps.getProperty(CONNECTION_PROP_WORKSPACE);
+
+        Credentials credentials = null;
+
+        if (username != null && !"".equals(username)) {
+            credentials = new SimpleCredentials(username, password.toCharArray());
+        }
+
+        Repository repository = getRepository(connProps);
+        Session jcrSession = null;
+
+        try {
+            if (credentials == null) {
+                if (workspace == null || "".equals(workspace)) {
+                    jcrSession = repository.login();
+                } else {
+                    jcrSession = repository.login(workspace);
+                }
+            } else {
+                if (workspace == null || "".equals(workspace)) {
+                    jcrSession = repository.login(credentials);
+                } else {
+                    jcrSession = repository.login(credentials, workspace);
+                }
+            }
+
+            return new JcrJdbcConnection(jcrSession);
+        } catch (RepositoryException e) {
+            throw new SQLException("Cannot login to JCR Repository. " + e.toString(), e);
+        }
     }
 
     @Override
     public boolean acceptsURL(String url) throws SQLException {
-        return false;
+        return url != null && url.startsWith(JDBC_JCR_URL_PREFIX);
     }
 
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
-        return null;
+        return new DriverPropertyInfo[0];
     }
 
     @Override
     public int getMajorVersion() {
-        return 0;
+        return Constants.MAJOR_VERSION;
     }
 
     @Override
     public int getMinorVersion() {
-        return 0;
+        return Constants.MINOR_VERSION;
     }
 
     @Override
@@ -57,7 +118,87 @@ public class Driver implements java.sql.Driver {
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
+    protected Repository getRepository(final Properties connProps) throws SQLException {
+        Repository repository = null;
+
+        try {
+            Jcr2davRepositoryFactory factory = new Jcr2davRepositoryFactory();
+            Map params = new HashMap();
+            final String location = connProps.getProperty(CONNECTION_PROP_LOCATION);
+            params.put(Spi2davexRepositoryServiceFactory.PARAM_REPOSITORY_URI, location);
+            repository = factory.getRepository(params);
+        } catch (RepositoryException e) {
+            throw new SQLException("Cannot get JCR repository. " + e.toString(), e);
+        }
+
+        return repository;
+    }
+
+    private Properties readConnectionProperties(final String url, final Properties info) throws SQLException {
+        if (url == null || !url.startsWith(JDBC_JCR_URL_PREFIX)) {
+            throw new SQLException(
+                    "Invalid jdbc-jcr URL: '" + url + "'. Must start with '" + JDBC_JCR_URL_PREFIX + "'.");
+        }
+
+        Properties props = new Properties();
+
+        String key;
+        String value;
+
+        if (info != null) {
+            for (Enumeration<?> propNames = info.propertyNames(); propNames.hasMoreElements();) {
+                key = (String) propNames.nextElement();
+                value = info.getProperty(key);
+
+                if (value != null) {
+                    props.setProperty(key.toUpperCase(), value);
+                }
+            }
+        }
+
+        String delimiter = "&";
+
+        int paramOffset = url.indexOf('?');
+
+        if (paramOffset == -1) {
+            paramOffset = url.indexOf(';');
+
+            if (paramOffset != -1) {
+                delimiter = ";";
+            }
+        }
+
+        if (paramOffset != -1) {
+            String params = url.substring(paramOffset + 1);
+            String[] keyValuePairs = params.split(delimiter);
+            int offset;
+
+            for (String keyValuePair : keyValuePairs) {
+                offset = keyValuePair.indexOf('=');
+
+                if (offset != -1) {
+                    try {
+                        key = keyValuePair.substring(0, offset).trim();
+                        value = URLDecoder.decode(keyValuePair.substring(offset + 1).trim(), "UTF-8");
+                        props.setProperty(key.toUpperCase(), value);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        String location = url.substring(JDBC_JCR_URL_PREFIX.length());
+
+        if (paramOffset != -1) {
+            location = location.substring(0, paramOffset);
+        }
+
+        props.setProperty(CONNECTION_PROP_LOCATION, location);
+
+        return props;
+    }
 }

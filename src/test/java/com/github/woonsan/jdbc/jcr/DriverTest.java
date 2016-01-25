@@ -34,7 +34,8 @@ import com.github.woonsan.jdbc.Constants;
 
 public class DriverTest {
 
-    private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:http://localhost:8080/server/";
+    private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:";
+    //private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:http://localhost:8080/server/";
 
     private java.sql.Driver jdbcDriver;
 

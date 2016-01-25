@@ -34,6 +34,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 
+import org.apache.jackrabbit.core.TransientRepository;
 import org.apache.jackrabbit.jcr2dav.Jcr2davRepositoryFactory;
 import org.apache.jackrabbit.spi2davex.Spi2davexRepositoryServiceFactory;
 
@@ -131,6 +132,8 @@ public class Driver implements java.sql.Driver {
                 throw new IllegalArgumentException("Invalid repository location.");
             } else if (location.startsWith("http:") || location.startsWith("https:")) {
                 repository = getJcr2davRepository(location);
+            } else if (location.trim().equals("")) {
+                repository = getTransientRepository();
             } else {
                 throw new IllegalArgumentException("Invalid repository location: " + location);
             }
@@ -141,14 +144,7 @@ public class Driver implements java.sql.Driver {
         return repository;
     }
 
-    private Repository getJcr2davRepository(final String location) throws RepositoryException {
-        Map params = new HashMap();
-        params.put(Spi2davexRepositoryServiceFactory.PARAM_REPOSITORY_URI, location);
-        Jcr2davRepositoryFactory factory = new Jcr2davRepositoryFactory();
-        return factory.getRepository(params);
-    }
-
-    private Properties readConnectionProperties(final String url, final Properties info) throws SQLException {
+    protected Properties readConnectionProperties(final String url, final Properties info) throws SQLException {
         if (url == null || !url.startsWith(JDBC_JCR_URL_PREFIX)) {
             throw new SQLException(
                     "Invalid jdbc-jcr URL: '" + url + "'. Must start with '" + JDBC_JCR_URL_PREFIX + "'.");
@@ -202,14 +198,28 @@ public class Driver implements java.sql.Driver {
             }
         }
 
-        String location = url.substring(JDBC_JCR_URL_PREFIX.length());
+        String location = null;
 
         if (paramOffset != -1) {
-            location = location.substring(0, paramOffset);
+            location = url.substring(JDBC_JCR_URL_PREFIX.length(), paramOffset);
+        } else {
+            location = url.substring(JDBC_JCR_URL_PREFIX.length());
         }
 
         props.setProperty(CONNECTION_PROP_LOCATION, location);
 
         return props;
     }
+
+    private Repository getJcr2davRepository(final String location) throws RepositoryException {
+        Map params = new HashMap();
+        params.put(Spi2davexRepositoryServiceFactory.PARAM_REPOSITORY_URI, location);
+        Jcr2davRepositoryFactory factory = new Jcr2davRepositoryFactory();
+        return factory.getRepository(params);
+    }
+
+    private Repository getTransientRepository() throws RepositoryException {
+        return new TransientRepository();
+    }
+
 }

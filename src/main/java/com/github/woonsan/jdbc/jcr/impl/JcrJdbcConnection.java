@@ -362,7 +362,7 @@ public class JcrJdbcConnection implements Connection {
         throw new UnsupportedOperationException();
     }
 
-    Session getJcrSession() {
+    protected Session getJcrSession() {
         return jcrSession;
     }
 }

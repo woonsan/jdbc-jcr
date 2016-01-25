@@ -85,7 +85,6 @@ public class DriverTest {
 
         Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL, info);
         assertFalse(conn.isClosed());
-        assertEquals("admin", conn.getClientInfo("userID"));
         assertTrue(conn.isReadOnly());
 
         conn.close();
@@ -99,7 +98,6 @@ public class DriverTest {
         Properties info = new Properties();
         Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL + params, info);
         assertFalse(conn.isClosed());
-        assertEquals("admin", conn.getClientInfo("userID"));
         assertTrue(conn.isReadOnly());
 
         conn.close();

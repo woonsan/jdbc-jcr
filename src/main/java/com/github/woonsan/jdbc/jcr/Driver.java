@@ -125,16 +125,27 @@ public class Driver implements java.sql.Driver {
         Repository repository = null;
 
         try {
-            Jcr2davRepositoryFactory factory = new Jcr2davRepositoryFactory();
-            Map params = new HashMap();
             final String location = connProps.getProperty(CONNECTION_PROP_LOCATION);
-            params.put(Spi2davexRepositoryServiceFactory.PARAM_REPOSITORY_URI, location);
-            repository = factory.getRepository(params);
+
+            if (location == null) {
+                throw new IllegalArgumentException("Invalid repository location.");
+            } else if (location.startsWith("http:") || location.startsWith("https:")) {
+                repository = getJcr2davRepository(location);
+            } else {
+                throw new IllegalArgumentException("Invalid repository location: " + location);
+            }
         } catch (RepositoryException e) {
             throw new SQLException("Cannot get JCR repository. " + e.toString(), e);
         }
 
         return repository;
+    }
+
+    private Repository getJcr2davRepository(final String location) throws RepositoryException {
+        Map params = new HashMap();
+        params.put(Spi2davexRepositoryServiceFactory.PARAM_REPOSITORY_URI, location);
+        Jcr2davRepositoryFactory factory = new Jcr2davRepositoryFactory();
+        return factory.getRepository(params);
     }
 
     private Properties readConnectionProperties(final String url, final Properties info) throws SQLException {

@@ -44,6 +44,9 @@ public class JcrJdbcConnection implements Connection {
 
     private boolean autoCommit = false;
     private boolean readOnly = true;
+    private int transactionIsolationLevel;
+    private int holdability;
+    private Properties clientInfos;
 
     public JcrJdbcConnection(Session jcrSession) {
         this.jcrSession = jcrSession;
@@ -61,7 +64,7 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public Statement createStatement() throws SQLException {
-        throw new UnsupportedOperationException();
+        return new JcrJdbcStatement(this);
     }
 
     @Override
@@ -81,10 +84,6 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if (autoCommit) {
-            throw new UnsupportedOperationException("Auto-commit mode cannot be turned on.");
-        }
-
         this.autoCommit = autoCommit;
     }
 
@@ -138,9 +137,7 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public void setReadOnly(boolean readOnly) throws SQLException {
-        if (!readOnly) {
-            throw new UnsupportedOperationException("Read-only mode cannot be set to false.");
-        }
+        this.readOnly = readOnly;
     }
 
     @Override
@@ -159,13 +156,13 @@ public class JcrJdbcConnection implements Connection {
     }
 
     @Override
-    public void setTransactionIsolation(int level) throws SQLException {
-        throw new UnsupportedOperationException();
+    public void setTransactionIsolation(int transactionIsolationLevel) throws SQLException {
+        this.transactionIsolationLevel = transactionIsolationLevel;
     }
 
     @Override
     public int getTransactionIsolation() throws SQLException {
-        throw new UnsupportedOperationException();
+        return transactionIsolationLevel;
     }
 
     @Override
@@ -180,7 +177,7 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        throw new UnsupportedOperationException();
+        return createStatement();
     }
 
     @Override
@@ -206,12 +203,12 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public void setHoldability(int holdability) throws SQLException {
-        throw new UnsupportedOperationException();
+        this.holdability = holdability;
     }
 
     @Override
     public int getHoldability() throws SQLException {
-        throw new UnsupportedOperationException();
+        return holdability;
     }
 
     @Override
@@ -237,7 +234,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        throw new UnsupportedOperationException();
+        return createStatement();
     }
 
     @Override
@@ -294,22 +291,28 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
-        throw new UnsupportedOperationException();
+        if (clientInfos == null) {
+            clientInfos = new Properties();
+        }
+
+        clientInfos.setProperty(name, value);
     }
 
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
-        throw new UnsupportedOperationException();
+        if (clientInfos == null) {
+            clientInfos = new Properties();
+        }
+
+        clientInfos.putAll(properties);
     }
 
     @Override
     public String getClientInfo(String name) throws SQLException {
-        Properties props = getClientInfo();
+        String value = null;
 
-        String value = props.getProperty(name);
-
-        if (value == null) {
-            throw new SQLClientInfoException();
+        if (clientInfos != null) {
+            value = clientInfos.getProperty(name);
         }
 
         return value;
@@ -317,9 +320,11 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public Properties getClientInfo() throws SQLException {
-        Properties props = new Properties();
-        props.setProperty("userID", jcrSession.getUserID());
-        return props;
+        if (clientInfos == null) {
+            clientInfos = new Properties();
+        }
+
+        return clientInfos;
     }
 
     @Override
@@ -357,4 +362,7 @@ public class JcrJdbcConnection implements Connection {
         throw new UnsupportedOperationException();
     }
 
+    Session getJcrSession() {
+        return jcrSession;
+    }
 }

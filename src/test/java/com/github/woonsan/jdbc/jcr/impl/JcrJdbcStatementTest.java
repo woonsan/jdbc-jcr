@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Properties;
 
@@ -33,7 +34,7 @@ import javax.jcr.Session;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Test;
 
 import com.github.woonsan.jdbc.jcr.Driver;
 
@@ -41,6 +42,18 @@ public class JcrJdbcStatementTest {
 
     private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:";
     //private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:http://localhost:8080/server/";
+
+    private static final String TEST_DATA_FOLDER_NAME = "testdatafolder";
+
+    private static final int ROW_COUNT = 50;
+
+    private static final String SQL_EMPS =
+            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
+            + "FROM [nt:unstructured] AS e "
+            + "WHERE ISDESCENDANTNODE('/" + TEST_DATA_FOLDER_NAME + "') "
+            + "ORDER BY e.[empno] ASC";
+
+    private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
 
     private java.sql.Driver jdbcDriver;
     private Connection connection;
@@ -57,12 +70,12 @@ public class JcrJdbcStatementTest {
         Session session = ((JcrJdbcConnection) connection).getJcrSession();
         Node rootNode = session.getRootNode();
 
-        if (rootNode.hasNode("testfolder")) {
-            rootNode.getNode("testfolder").remove();
+        if (rootNode.hasNode(TEST_DATA_FOLDER_NAME)) {
+            rootNode.getNode(TEST_DATA_FOLDER_NAME).remove();
             session.save();
         }
 
-        Node testDataFolderNode = rootNode.addNode("testfolder", "nt:unstructured");
+        Node testDataFolderNode = rootNode.addNode(TEST_DATA_FOLDER_NAME, "nt:unstructured");
         createTestData(testDataFolderNode);
         session.save();
     }
@@ -71,7 +84,7 @@ public class JcrJdbcStatementTest {
         Node dataNode;
         expectedHireDate = Calendar.getInstance();
 
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= ROW_COUNT; i++) {
             dataNode = testDataFolderNode.addNode("testdata-" + i, "nt:unstructured");
             dataNode.setProperty("empno", i);
             dataNode.setProperty("ename", "Name " + i);
@@ -85,12 +98,10 @@ public class JcrJdbcStatementTest {
         connection.close();
     }
 
-    //@Test
-    @Ignore
+    @Test
     public void testExecuteQuery() throws Exception {
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(
-                "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate FROM [nt:unstructured] AS e");
+        ResultSet rs = statement.executeQuery(SQL_EMPS);
 
         assertFalse(rs.isClosed());
         assertTrue(rs.isBeforeFirst());
@@ -102,6 +113,11 @@ public class JcrJdbcStatementTest {
         double salary;
         Date hireDate;
 
+        System.out.println();
+        System.out.println("==================================================");
+        System.out.println("   empno        ename      salary       hire_date");
+        System.out.println("==================================================");
+
         while (rs.next()) {
             ++i;
             empno = rs.getLong(1);
@@ -109,13 +125,19 @@ public class JcrJdbcStatementTest {
             salary = rs.getDouble(3);
             hireDate = rs.getDate(4);
 
+            System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
+                    new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
+
             assertEquals(i, empno);
             assertEquals("Name " + i, ename);
             assertEquals(100000.0 + i, salary, .1);
             assertEquals(expectedHireDate.getTimeInMillis(), hireDate.getTime());
         }
 
-        assertEquals(100, i);
+        System.out.println("==================================================");
+        System.out.println();
+
+        assertEquals(ROW_COUNT, i);
         assertFalse(rs.isBeforeFirst());
         assertTrue(rs.isAfterLast());
         rs.close();

@@ -33,8 +33,6 @@ import com.github.woonsan.jdbc.jcr.Driver;
 
 public class AbstractRepositoryEnabledTestCase {
 
-    //private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:http://localhost:8080/server/";
-    //private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:java:comp/env/jcr/repository";
     private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:";
 
     protected static final String TEST_DATE_NODE_NAME = "testdatafolder";

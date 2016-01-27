@@ -20,6 +20,21 @@ Add the following dependency:
             </dependency>
 ```
 
+# JDBC URLs
+
+JDBC URLs using this drivers must start with 'jdbc:jcr:'.
+The following JDBC URLs are supported:
+1. *jdbc:jcr:http(s)://...*
+1. *jdbc:jcr:file://...*
+1. *jdbc:jcr:jndi:...*
+1. *jdbc:jcr:*
+
+The first one is to create a remote repository connection using SPI2DAVex with the given URL.
+The second one is to create an embedded Jackrabbit repository located in the given directory.
+The third one is to lookup JNDI for the named repository. See the org.apache.jackrabbit.commons.JndiRepositoryFactory
+for more details.
+The fourth one (with an empty location) is to create a TransientRepository.
+
 # A Simple Example
 
 ```java
@@ -27,16 +42,6 @@ Add the following dependency:
         info.setProperty("username", "admin");
         info.setProperty("password", "admin");
 
-        // JDBC URL should always starts with 'jdbc:jcr:'.
-        // If it starts with 'jdbc:jcr:http:', then it creates JCR over WebDAV repository
-        // (using org.apache.jackrabbit.jcr2dav.Jcr2davRepositoryFactory).
-        // If it starts with 'jdbc:jcr:comp/env', then it finds the repository from the JNDI resources
-        // (using InitialContext).
-        // Finally, it is empty after 'jdbc:jcr:', then it creates a TransientRepository for testing purpose
-        // (using org.apache.jackrabbit.core.TransientRepository).
-        //
-        //final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:http://localhost:8080/server/";
-        //final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:java:comp/env/jcr/repository";
         final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:";
 
         Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL, info);

@@ -24,10 +24,11 @@ Add the following dependency:
 
 JDBC URLs using this drivers must start with 'jdbc:jcr:'.
 The following JDBC URLs are supported:
-1. *jdbc:jcr:http(s)://...*
-1. *jdbc:jcr:file://...*
-1. *jdbc:jcr:jndi:...*
-1. *jdbc:jcr:*
+
+- *jdbc:jcr:http(s)://...*
+- *jdbc:jcr:file://...*
+- *jdbc:jcr:jndi:...*
+- *jdbc:jcr:*
 
 The first one is to create a remote repository connection using SPI2DAVex with the given URL.
 The second one is to create an embedded Jackrabbit repository located in the given directory.

@@ -16,15 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.woonsan.jdbc;
+package com.github.woonsan.jdbc.jcr;
 
-public class Constants {
+public class TestConstants {
 
-    public static final int MAJOR_VERSION = 0;
+    public static final String DEFAULT_TEST_JDBC_URL = "jdbc:jcr:";
 
-    public static final int MINOR_VERSION = 1;
-
-    private Constants() {
+    private TestConstants() {
     }
 
 }

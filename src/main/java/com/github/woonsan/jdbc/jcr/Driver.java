@@ -41,7 +41,6 @@ import org.apache.jackrabbit.core.TransientRepository;
 import org.apache.jackrabbit.jcr2dav.Jcr2davRepositoryFactory;
 import org.apache.jackrabbit.spi2davex.Spi2davexRepositoryServiceFactory;
 
-import com.github.woonsan.jdbc.Constants;
 import com.github.woonsan.jdbc.jcr.impl.JcrJdbcConnection;
 
 public class Driver implements java.sql.Driver {

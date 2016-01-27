@@ -32,11 +32,7 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.woonsan.jdbc.Constants;
-
 public class DriverTest {
-
-    private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:";
 
     private java.sql.Driver jdbcDriver;
 
@@ -59,14 +55,15 @@ public class DriverTest {
     @Test
     public void testAcceptsURL() throws Exception {
         assertFalse(jdbcDriver.acceptsURL("jdbc:h2:test"));
-        assertTrue(jdbcDriver.acceptsURL(DEFAULT_LOCAL_SERVER_JDBC_URL));
+        assertTrue(jdbcDriver.acceptsURL(TestConstants.DEFAULT_TEST_JDBC_URL));
     }
 
     @Test
     public void testGetPropertyInfo() throws Exception {
         Properties info = new Properties();
-        DriverPropertyInfo[] propInfos = jdbcDriver.getPropertyInfo(DEFAULT_LOCAL_SERVER_JDBC_URL, info);
+        DriverPropertyInfo[] propInfos = jdbcDriver.getPropertyInfo(TestConstants.DEFAULT_TEST_JDBC_URL, info);
         assertNotNull(propInfos);
+        assertEquals(0, propInfos.length);
     }
 
     @Test
@@ -85,7 +82,7 @@ public class DriverTest {
         info.setProperty("username", "admin");
         info.setProperty("password", "admin");
 
-        Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL, info);
+        Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
         assertFalse(conn.isClosed());
         assertTrue(conn.isReadOnly());
 
@@ -98,7 +95,7 @@ public class DriverTest {
         String params = "?username=admin&password=admin";
 
         Properties info = new Properties();
-        Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL + params, info);
+        Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL + params, info);
         assertFalse(conn.isClosed());
         assertTrue(conn.isReadOnly());
 

@@ -28,11 +28,12 @@ import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryResult;
 
-public class JcrJdbcStatement implements Statement {
+class JcrJdbcStatement implements Statement {
 
     private JcrJdbcConnection connection;
     private int maxFieldSize;
     private int maxRows;
+    // TODO: Since variable binding is unavailable in JCR_SQL2, maybe we can use this option?
     private boolean escapeProcessing = true;
     private int queryTimeout;
     private int updateCount = -1;
@@ -348,7 +349,7 @@ public class JcrJdbcStatement implements Statement {
 
     @Override
     public boolean isClosed() throws SQLException {
-        return closed;
+        return closed || connection == null || connection.isClosed();
     }
 
     @Override

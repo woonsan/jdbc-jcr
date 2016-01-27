@@ -128,119 +128,67 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getString(columnNames[columnIndex - 1]);
+        return getString(findColumnName(columnIndex));
     }
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getBoolean(columnNames[columnIndex - 1]);
+        return getBoolean(findColumnName(columnIndex));
     }
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getByte(columnNames[columnIndex - 1]);
+        return getByte(findColumnName(columnIndex));
     }
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getShort(columnNames[columnIndex - 1]);
+        return getShort(findColumnName(columnIndex));
     }
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getInt(columnNames[columnIndex - 1]);
+        return getInt(findColumnName(columnIndex));
     }
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getLong(columnNames[columnIndex - 1]);
+        return getLong(findColumnName(columnIndex));
     }
 
     @Override
     public float getFloat(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getFloat(columnNames[columnIndex - 1]);
+        return getFloat(findColumnName(columnIndex));
     }
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getDouble(columnNames[columnIndex - 1]);
+        return getDouble(findColumnName(columnIndex));
     }
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getBigDecimal(columnNames[columnIndex - 1], scale);
+        return getBigDecimal(findColumnName(columnIndex), scale);
     }
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getBytes(columnNames[columnIndex - 1]);
+        return getBytes(findColumnName(columnIndex));
     }
 
     @Override
     public Date getDate(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getDate(columnNames[columnIndex - 1]);
+        return getDate(findColumnName(columnIndex));
     }
 
     @Override
     public Time getTime(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getTime(columnNames[columnIndex - 1]);
+        return getTime(findColumnName(columnIndex));
     }
 
     @Override
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getTimestamp(columnNames[columnIndex - 1]);
+        return getTimestamp(findColumnName(columnIndex));
     }
 
     @Override
@@ -255,11 +203,7 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public InputStream getBinaryStream(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getBinaryStream(columnNames[columnIndex - 1]);
+        return getBinaryStream(findColumnName(columnIndex));
     }
 
     @Override
@@ -518,7 +462,9 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
-        for (int i = 0; i < columnNames.length; i++) {
+        final int columnCount = columnNames != null ? columnNames.length : 0;
+
+        for (int i = 0; i < columnCount; i++) {
             if (columnLabel.equals(columnNames[i])) {
                 return i + 1;
             }
@@ -529,11 +475,7 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public Reader getCharacterStream(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getCharacterStream(columnNames[columnIndex - 1]);
+        return getCharacterStream(findColumnName(columnIndex));
     }
 
     @Override
@@ -547,11 +489,7 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getBigDecimal(columnNames[columnIndex - 1]);
+        return getBigDecimal(findColumnName(columnIndex));
     }
 
     @Override
@@ -983,11 +921,7 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public Array getArray(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return getArray(columnNames[columnIndex - 1]);
+        return getArray(findColumnName(columnIndex));
     }
 
     @Override
@@ -1138,7 +1072,7 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public boolean isClosed() throws SQLException {
-        return closed;
+        return closed || statement == null || statement.isClosed();
     }
 
     @Override
@@ -1359,6 +1293,16 @@ class JcrJdbcResultSet implements ResultSet {
     @Override
     public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
         throw new SQLFeatureNotSupportedException();
+    }
+
+    private String findColumnName(int columnIndex) throws SQLException {
+        final int columnCount = columnNames != null ? columnNames.length : 0;
+
+        if (columnIndex < 1 || columnIndex > columnCount) {
+            throw new SQLException("Invalid column index.");
+        }
+
+        return columnNames[columnIndex - 1];
     }
 
     static class JcrValueArray implements Array {

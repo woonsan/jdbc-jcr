@@ -41,7 +41,7 @@ class JcrJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnCount() throws SQLException {
-        return columnNames.length;
+        return columnNames != null ? columnNames.length : 0;
     }
 
     @Override
@@ -81,16 +81,12 @@ class JcrJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getColumnLabel(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > columnNames.length) {
-            throw new SQLException("Invalid column index.");
-        }
-
-        return columnNames[columnIndex - 1];
+        return findColumnName(columnIndex);
     }
 
     @Override
     public String getColumnName(int columnIndex) throws SQLException {
-        return getColumnLabel(columnIndex);
+        return findColumnName(columnIndex);
     }
 
     @Override
@@ -146,6 +142,16 @@ class JcrJdbcResultSetMetaData implements ResultSetMetaData {
     @Override
     public String getColumnClassName(int column) throws SQLException {
         throw new UnsupportedOperationException();
+    }
+
+    private String findColumnName(int columnIndex) throws SQLException {
+        final int columnCount = columnNames != null ? columnNames.length : 0;
+
+        if (columnIndex < 1 || columnIndex > columnCount) {
+            throw new SQLException("Invalid column index.");
+        }
+
+        return columnNames[columnIndex - 1];
     }
 
 }

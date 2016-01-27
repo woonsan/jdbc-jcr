@@ -24,7 +24,7 @@ import java.io.InputStream;
 import javax.jcr.Binary;
 import javax.jcr.RepositoryException;
 
-public class BinaryUtils {
+class BinaryUtils {
 
     private BinaryUtils() {
     }

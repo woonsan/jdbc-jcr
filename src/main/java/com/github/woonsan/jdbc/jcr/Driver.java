@@ -35,6 +35,8 @@ import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.apache.jackrabbit.core.TransientRepository;
 import org.apache.jackrabbit.jcr2dav.Jcr2davRepositoryFactory;
@@ -134,12 +136,15 @@ public class Driver implements java.sql.Driver {
                 throw new IllegalArgumentException("Invalid repository location.");
             } else if (location.startsWith("http:") || location.startsWith("https:")) {
                 repository = getJcr2davRepository(location);
+            } else if (location.startsWith("java:comp/env/")) {
+                InitialContext ctx = new InitialContext();
+                repository = (Repository) ctx.lookup(location);
             } else if (location.trim().equals("")) {
                 repository = getTransientRepository();
             } else {
                 throw new IllegalArgumentException("Invalid repository location: " + location);
             }
-        } catch (RepositoryException e) {
+        } catch (NamingException | RepositoryException e) {
             throw new SQLException("Cannot get JCR repository. " + e.toString(), e);
         }
 

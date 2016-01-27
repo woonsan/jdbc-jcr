@@ -12,14 +12,17 @@ JDBC Driver for JCR Repository
 
 Add the following dependency:
 
+```xml
             <dependency>
                 <groupId>com.github.woonsan</groupId>
                 <artifactId>jdbc-jcr</artifactId>
                 <version>${jdbc-jcr.version}</version>
             </dependency>
+```
 
 # A Simple Example
 
+```java
         java.util.Properties info = new java.util.Properties();
         info.setProperty("username", "admin");
         info.setProperty("password", "admin");
@@ -82,3 +85,4 @@ Add the following dependency:
         rs.close();
         stmt.close();
         conn.close();
+```

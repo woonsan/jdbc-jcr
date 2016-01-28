@@ -25,8 +25,6 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -38,8 +36,6 @@ import javax.jcr.SimpleCredentials;
 
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.core.TransientRepository;
-import org.apache.jackrabbit.jcr2dav.Jcr2davRepositoryFactory;
-import org.apache.jackrabbit.spi2davex.Spi2davexRepositoryServiceFactory;
 
 import com.github.woonsan.jdbc.jcr.impl.JcrJdbcConnection;
 
@@ -54,6 +50,10 @@ public class Driver implements java.sql.Driver {
     protected static final String CONNECTION_PROP_PASSWORD = "PASSWORD";
 
     protected static final String CONNECTION_PROP_WORKSPACE = "WORKSPACE";
+
+    protected static final String REPO_CONF_PROPERTY = "REPOSITORY.CONF";
+
+    protected static final String REPO_HOME_PROPERTY = "REPOSITORY.HOME";
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
@@ -131,7 +131,7 @@ public class Driver implements java.sql.Driver {
             final String location = connProps.getProperty(CONNECTION_PROP_LOCATION);
 
             if (location == null || "".equals(location.trim())) {
-                repository = getTransientRepository();
+                repository = getTransientRepository(connProps);
             } else {
                 repository = JcrUtils.getRepository(location);
             }
@@ -209,15 +209,17 @@ public class Driver implements java.sql.Driver {
         return props;
     }
 
-    private Repository getJcr2davRepository(final String location) throws RepositoryException {
-        Map params = new HashMap();
-        params.put(Spi2davexRepositoryServiceFactory.PARAM_REPOSITORY_URI, location);
-        Jcr2davRepositoryFactory factory = new Jcr2davRepositoryFactory();
-        return factory.getRepository(params);
-    }
+    private Repository getTransientRepository(final Properties connProps) throws RepositoryException {
+        String repoConfProp = connProps.getProperty(REPO_CONF_PROPERTY.toUpperCase(), null);
+        String repoHomeProp = connProps.getProperty(REPO_HOME_PROPERTY.toUpperCase(), null);
 
-    private Repository getTransientRepository() throws RepositoryException {
-        return new TransientRepository();
+        if (repoConfProp == null || repoHomeProp == null) {
+            throw new RepositoryException(
+                    "Transient repository configuration not found. " + REPO_CONF_PROPERTY + ": "
+                            + repoConfProp + ", " + REPO_HOME_PROPERTY + ": " + repoHomeProp);
+        }
+
+        return new TransientRepository(repoConfProp, repoHomeProp);
     }
 
 }

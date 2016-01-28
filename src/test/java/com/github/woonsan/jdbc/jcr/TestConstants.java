@@ -20,7 +20,8 @@ package com.github.woonsan.jdbc.jcr;
 
 public class TestConstants {
 
-    public static final String DEFAULT_TEST_JDBC_URL = "jdbc:jcr:";
+    //public static final String DEFAULT_TEST_JDBC_URL = "jdbc:jcr:http://localhost:8080/server/";
+    public static final String DEFAULT_TEST_JDBC_URL = "jdbc:jcr:?repository.conf=repository.xml&repository.home=repository";
 
     private TestConstants() {
     }

@@ -92,10 +92,17 @@ public class DriverTest {
 
     @Test
     public void testConnectByParams() throws Exception {
-        String params = "?username=admin&password=admin";
+        String extraParams = "username=admin&password=admin";
+        String combinedJdbcUrl = TestConstants.DEFAULT_TEST_JDBC_URL;
+
+        if (combinedJdbcUrl.indexOf('?') != -1) {
+            combinedJdbcUrl += "&" + extraParams;
+        } else {
+            combinedJdbcUrl += "?" + extraParams;
+        }
 
         Properties info = new Properties();
-        Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL + params, info);
+        Connection conn = jdbcDriver.connect(combinedJdbcUrl, info);
         assertFalse(conn.isClosed());
         assertTrue(conn.isReadOnly());
 

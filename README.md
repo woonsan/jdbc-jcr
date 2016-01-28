@@ -25,16 +25,16 @@ Add the following dependency:
 JDBC URLs using this drivers must start with 'jdbc:jcr:'.
 The following JDBC URLs are supported:
 
-- *jdbc:jcr:http(s)://...*
-- *jdbc:jcr:file://...*
-- *jdbc:jcr:jndi:...*
-- *jdbc:jcr:*
+- **jdbc:jcr:http(s)://...**    (e.g, jdbc:jcr:http://localhost:8080/server/)
+- **jdbc:jcr:file://...**
+- **jdbc:jcr:jndi:...**
+- **jdbc:jcr:**     (e.g, jdbc:jcr:?repository.conf=repository.xml&repository.home=repository)
 
 The first one is to create a remote repository connection using SPI2DAVex with the given URL.
 The second one is to create an embedded Jackrabbit repository located in the given directory.
 The third one is to lookup JNDI for the named repository. See the org.apache.jackrabbit.commons.JndiRepositoryFactory
 for more details.
-The fourth one (with an empty location) is to create a TransientRepository.
+The fourth one (with an empty location and repository parameters) is to create a TransientRepository.
 
 # A Simple Example
 
@@ -43,9 +43,8 @@ The fourth one (with an empty location) is to create a TransientRepository.
         info.setProperty("username", "admin");
         info.setProperty("password", "admin");
 
-        final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:";
-
-        Connection conn = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL, info);
+        final String jdbcUrl = "jdbc:jcr:http://localhost:8080/server/";
+        Connection conn = jdbcDriver.connect(jdbcUrl, info);
 
         // Assuming you have nt:unstructure nodes under /testdatafolder node and
         // each node contains the following properties:
@@ -54,14 +53,14 @@ The fourth one (with an empty location) is to create a TransientRepository.
         // - salary (double)
         // - hiredate (date)
 
-        final String SQL_EMPS =
+        final String sql =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('/testdatafolder') "
             + "ORDER BY e.[empno] ASC";
 
         Statement stmt = getConnection().createStatement();
-        ResultSet rs = stmt.executeQuery(SQL_EMPS);
+        ResultSet rs = stmt.executeQuery(sql);
 
         int i = 0;
         long empno;
@@ -74,6 +73,8 @@ The fourth one (with an empty location) is to create a TransientRepository.
         System.out.println("   empno        ename      salary       hire_date");
         System.out.println("==================================================");
 
+        final String rowFormat = "%8d\t%s\t%8.2f\t%s";
+
         while (rs.next()) {
             ++i;
             empno = rs.getLong(1);
@@ -81,7 +82,7 @@ The fourth one (with an empty location) is to create a TransientRepository.
             salary = rs.getDouble(3);
             hireDate = rs.getDate(4);
 
-            System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
+            System.out.println(String.format(rowFormat, empno, ename, salary,
                     new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
         }
 

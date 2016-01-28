@@ -30,10 +30,9 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.github.woonsan.jdbc.jcr.Driver;
+import com.github.woonsan.jdbc.jcr.TestConstants;
 
 public class AbstractRepositoryEnabledTestCase {
-
-    private static final String DEFAULT_LOCAL_SERVER_JDBC_URL = "jdbc:jcr:";
 
     protected static final String TEST_DATE_NODE_NAME = "testdatafolder";
     protected static final String TEST_DATE_NODE_PATH = "/" + TEST_DATE_NODE_NAME;
@@ -50,7 +49,7 @@ public class AbstractRepositoryEnabledTestCase {
         Properties info = new Properties();
         info.setProperty("username", "admin");
         info.setProperty("password", "admin");
-        connection = jdbcDriver.connect(DEFAULT_LOCAL_SERVER_JDBC_URL, info);
+        connection = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
 
         Session session = ((JcrJdbcConnection) connection).getJcrSession();
         Node rootNode = session.getRootNode();

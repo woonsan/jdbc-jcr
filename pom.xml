@@ -96,7 +96,7 @@
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>jackrabbit-jcr2dav</artifactId>
       <version>${jackrabbit.version}</version>
-      <scope>provided</scope>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

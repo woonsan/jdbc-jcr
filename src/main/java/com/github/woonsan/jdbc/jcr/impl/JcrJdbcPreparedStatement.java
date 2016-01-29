@@ -67,12 +67,14 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     }
 
     @Override
+    public void setMaxRows(int maxRows) throws SQLException {
+        super.setMaxRows(maxRows);
+        query.setLimit(maxRows);
+    }
+
+    @Override
     public ResultSet executeQuery() throws SQLException {
         try {
-            if (getMaxRows() > 0) {
-                query.setLimit(getMaxRows());
-            }
-
             QueryResult queryResult = query.execute();
             setResultSet(new JcrJdbcResultSet(this, queryResult));
         } catch (RepositoryException e) {

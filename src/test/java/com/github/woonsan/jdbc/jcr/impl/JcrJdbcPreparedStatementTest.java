@@ -40,11 +40,12 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
 
     private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
 
-    //TODO: bind variable doesn't seem to work properly.. investigate it...
     @Test
     public void testExecuteQuery() throws Exception {
+        final int offset = 10;
+
         PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS);
-        pstmt.setDouble(1, 10010.0);
+        pstmt.setDouble(1, 100000.0 + offset);
         ResultSet rs = pstmt.executeQuery();
 
         assertFalse(rs.isClosed());
@@ -72,16 +73,16 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
             System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
                     new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
 
-            assertEquals(i, empno);
-            assertEquals("Name " + i, ename);
-            assertEquals(100000.0 + i, salary, .1);
+            assertEquals(i + offset, empno);
+            assertEquals("Name " + (i + offset), ename);
+            assertEquals(100000.0 + (i + offset), salary, .1);
             assertEquals(getEmpHireDate().getTimeInMillis(), hireDate.getTime());
         }
 
         System.out.println("==================================================");
         System.out.println();
 
-        assertEquals(getEmpRowCount(), i);
+        assertEquals(getEmpRowCount() - offset, i);
         assertFalse(rs.isBeforeFirst());
         assertTrue(rs.isAfterLast());
         rs.close();

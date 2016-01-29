@@ -113,6 +113,10 @@ class JcrJdbcStatement implements Statement {
 
     @Override
     public void setMaxFieldSize(int maxFieldSize) throws SQLException {
+        if (maxFieldSize < 0) {
+            throw new SQLException("Invalid negative value.");
+        }
+
         if (isClosed()) {
             throw new SQLException("Statement was already closed.");
         }
@@ -131,6 +135,10 @@ class JcrJdbcStatement implements Statement {
 
     @Override
     public void setMaxRows(int maxRows) throws SQLException {
+        if (maxRows < 0) {
+            throw new SQLException("Invalid negative value.");
+        }
+
         if (isClosed()) {
             throw new SQLException("Statement was already closed.");
         }
@@ -158,6 +166,10 @@ class JcrJdbcStatement implements Statement {
 
     @Override
     public void setQueryTimeout(int queryTimeout) throws SQLException {
+        if (queryTimeout < 0) {
+            throw new SQLException("Invalid negative value.");
+        }
+
         if (isClosed()) {
             throw new SQLException("Statement was already closed.");
         }
@@ -241,6 +253,10 @@ class JcrJdbcStatement implements Statement {
 
     @Override
     public void setFetchSize(int fetchSize) throws SQLException {
+        if (fetchSize < 0) {
+            throw new SQLException("Invalid negative value.");
+        }
+
         if (isClosed()) {
             throw new SQLException("Statement was already closed.");
         }

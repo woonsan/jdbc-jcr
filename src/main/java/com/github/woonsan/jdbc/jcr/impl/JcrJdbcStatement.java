@@ -46,8 +46,9 @@ class JcrJdbcStatement implements Statement {
     private boolean poolable;
     private boolean closeOnCompletion;
 
-    private ResultSet currentResultSet;
     private boolean closed;
+
+    private ResultSet currentResultSet;
 
     public JcrJdbcStatement(final JcrJdbcConnection connection) {
         this.connection = connection;
@@ -196,6 +197,10 @@ class JcrJdbcStatement implements Statement {
         }
 
         return currentResultSet;
+    }
+
+    protected void setResultSet(final ResultSet currentResultSet) {
+        this.currentResultSet = currentResultSet;
     }
 
     @Override

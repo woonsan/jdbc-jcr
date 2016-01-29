@@ -76,7 +76,11 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        throw new UnsupportedOperationException();
+        if (isClosed()) {
+            throw new IllegalStateException("JCR session was already closed.");
+        }
+
+        return new JcrJdbcPreparedStatement(this, sql);
     }
 
     @Override

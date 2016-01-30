@@ -39,6 +39,8 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
@@ -52,7 +54,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     private final Query query;
 
-    private final String [] bindVariableNames;
+    private final Map<Integer, String> bindVariableNames = new LinkedHashMap<>();
 
     public JcrJdbcPreparedStatement(final JcrJdbcConnection connection, final String sql) throws SQLException {
         super(connection);
@@ -60,7 +62,12 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
         try {
             valueFactory = connection.getJcrSession().getValueFactory();
             query = connection.getJcrSession().getWorkspace().getQueryManager().createQuery(sql, Query.JCR_SQL2);
-            bindVariableNames = query.getBindVariableNames();
+
+            String [] varNames= query.getBindVariableNames();
+
+            for (int i = 0; i < varNames.length; i++) {
+                bindVariableNames.put(i + 1, varNames[i]);
+            }
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -405,18 +412,10 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     }
 
     private String findBindVariableName(int parameterIndex) throws SQLException {
-        final int bindVariableNameCount = bindVariableNames != null ? bindVariableNames.length : 0;
-
-        if (parameterIndex < 1 || parameterIndex > bindVariableNameCount) {
-            throw new SQLException("Invalid parameter index.");
+        if (!bindVariableNames.containsKey(parameterIndex)) {
+            throw new SQLException("Invalid parameter index. Parameters: " + bindVariableNames);
         }
 
-        String bindVariableName = null;
-
-        if (bindVariableNames != null) {
-            bindVariableName = bindVariableNames[parameterIndex - 1];
-        }
-
-        return bindVariableName;
+        return bindVariableNames.get(parameterIndex);
     }
 }

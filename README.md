@@ -54,14 +54,14 @@ The fourth one (with an empty location and repository parameters) is to create a
 # Example with Statement
 
 ```java
-        /*
-        /* Assuming you have nt:unstructure nodes under /testdatafolder node and
-        /* each node contains the following properties:
-        /* - empno (long)
-        /* - ename (string)
-        /* - salary (double)
-        /* - hiredate (date)
-        /*
+        //
+        // Assuming you have nt:unstructure nodes under /testdatafolder node and
+        // each node contains the following properties:
+        // - empno (long)
+        // - ename (string)
+        // - salary (double)
+        // - hiredate (date)
+        //
 
         final String sql1 =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "

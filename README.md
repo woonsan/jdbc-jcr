@@ -1,6 +1,7 @@
 # jdbc-jcr
 
 [![Build Status](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/woonsan/jdbc-jcr/badge.svg?branch=master)](https://coveralls.io/repos/woonsan/jdbc-jcr/badge.svg?branch=master)
 
 JDBC Driver for JCR Repository
 

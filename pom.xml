@@ -46,6 +46,22 @@
 
   </properties>
 
+  <scm>
+    <connection>scm:git:https://github.com/woonsan/jdbc-jcr.git</connection>
+    <developerConnection>scm:git:https://github.com/woonsan/jdbc-jcr.git</developerConnection>
+    <url>https://github.com/woonsan/jdbc-jcr.git</url>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/woonsan/jdbc-jcr/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Hudson</system>
+    <url>https://travis-ci.org/woonsan/jdbc-jcr</url>
+  </ciManagement>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -126,7 +142,7 @@
 
   <profiles>
 
-    <profile> 
+    <profile>
       <id>ossrh-release</id>
       <build>
         <plugins>

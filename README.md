@@ -2,6 +2,7 @@
 
 [![Build Status](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/woonsan/jdbc-jcr/badge.svg?branch=master)](https://coveralls.io/repos/woonsan/jdbc-jcr/badge.svg?branch=master)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.woonsan/jdbc-jcr.svg)](http://mvnrepository.com/artifact/com.github.woonsan/jdbc-jcr)
 
 JDBC Driver for JCR Repository
 

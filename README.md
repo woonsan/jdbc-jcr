@@ -1,7 +1,8 @@
 # jdbc-jcr
 
-[![Build Status](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/woonsan/jdbc-jcr/badge.svg?branch=master)](https://coveralls.io/repos/woonsan/jdbc-jcr/badge.svg?branch=master)
+[![Build Status](https://travis-ci.org/woonsan/jdbc-jcr.svg?branch=develop)](https://travis-ci.org/woonsan/jdbc-jcr)
+[![Coverage Status](https://coveralls.io/repos/github/woonsan/jdbc-jcr/badge.svg?branch=develop)](https://coveralls.io/github/woonsan/jdbc-jcr?branch=develop)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.woonsan/jdbc-jcr.svg)](http://mvnrepository.com/artifact/com.github.woonsan/jdbc-jcr)
 
 JDBC Driver for JCR Repository
 
@@ -14,30 +15,30 @@ JDBC Driver for JCR Repository
 Add the following dependency:
 
 ```xml
-            <dependency>
-                <groupId>com.github.woonsan</groupId>
-                <artifactId>jdbc-jcr</artifactId>
-                <version>${jdbc-jcr.version}</version>
-            </dependency>
+    <dependency>
+      <groupId>com.github.woonsan</groupId>
+      <artifactId>jdbc-jcr</artifactId>
+      <version>${jdbc-jcr.version}</version>
+    </dependency>
 ```
 
 # JDBC URLs
 
-JDBC URLs using this drivers must start with 'jdbc:jcr:'.
+JDBC URLs using this drivers must start with ```jdbc:jcr:```.
 The following JDBC URLs are supported:
 
-- **jdbc:jcr:http(s)://...**    (e.g, jdbc:jcr:http://localhost:8080/server/)
-- **jdbc:jcr:file://...**
-- **jdbc:jcr:jndi:...**
-- **jdbc:jcr:**     (e.g, jdbc:jcr:?repository.conf=repository.xml&repository.home=repository)
+- ```jdbc:jcr:http(s)://...```    (e.g, ```jdbc:jcr:http://localhost:8080/server/```)
+- ```jdbc:jcr:file://...```
+- ```jdbc:jcr:jndi:...```
+- ```jdbc:jcr:```     (e.g, ```jdbc:jcr:?repository.conf=repository.xml&repository.home=repository```)
 
-The first one is to create a remote repository connection using SPI2DAVex with the given URL.
+The first one is to create a remote repository connection using ```SPI2DAVex``` with the given URL.
 The second one is to create an embedded Jackrabbit repository located in the given directory.
-The third one is to lookup JNDI for the named repository. See the org.apache.jackrabbit.commons.JndiRepositoryFactory
+The third one is to lookup JNDI for the named repository. See the ```org.apache.jackrabbit.commons.JndiRepositoryFactory```
 for more details.
-The fourth one (with an empty location and repository parameters) is to create a TransientRepository.
+The fourth one (with an empty location and repository parameters) is to create a ```TransientRepository```.
 
-# Example to Create Connection
+# Example to create JDBC ```Connection```
 
 ```java
         private Connection getConnection() throws SQLException {
@@ -52,7 +53,23 @@ The fourth one (with an empty location and repository parameters) is to create a
         }
 ```
 
-# Example with Statement
+# Example to define JNDI ```DataSource``` resource
+
+It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repository```.
+
+```xml
+  <Resource name="jdbc/jcr"
+            auth="Container"
+            type="javax.sql.DataSource"
+            username="liveusername"
+            password="liveuserpass"
+            driverClassName="com.github.woonsan.jdbc.jcr.Driver"
+            url="jdbc:jcr:jndi:java:comp/env/jcr/repository"
+            maxActive="20"
+            maxIdle="10"/>
+```
+
+# Example with ```Statement```
 
 ```java
         //
@@ -110,7 +127,7 @@ The fourth one (with an empty location and repository parameters) is to create a
         }
 ```
 
-# Example with PreparedStatement
+# Example with ```PreparedStatement```
 
 ```java
         final String sql2 =

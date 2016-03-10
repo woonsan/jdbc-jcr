@@ -50,6 +50,8 @@ public class JcrJdbcConnection implements Connection {
     private int holdability;
     private Properties clientInfos;
     private boolean closed;
+    private SQLWarning warning;
+    private DatabaseMetaData metaData;
 
     public JcrJdbcConnection(Session jcrSession) {
         this.jcrSession = jcrSession;
@@ -161,7 +163,7 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        throw new UnsupportedOperationException();
+        return metaData;
     }
 
     @Override
@@ -216,12 +218,12 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public SQLWarning getWarnings() throws SQLException {
-        throw new UnsupportedOperationException();
+        return warning;
     }
 
     @Override
     public void clearWarnings() throws SQLException {
-        throw new UnsupportedOperationException();
+        warning = null;
     }
 
     @Override
@@ -343,7 +345,7 @@ public class JcrJdbcConnection implements Connection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        throw new UnsupportedOperationException();
+        return jcrSession != null && jcrSession.isLive();
     }
 
     @Override

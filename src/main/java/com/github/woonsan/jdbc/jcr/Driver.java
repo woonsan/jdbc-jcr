@@ -45,6 +45,8 @@ public class Driver implements java.sql.Driver {
 
     protected static final String CONNECTION_PROP_LOCATION = "LOCATION";
 
+    protected static final String CONNECTION_PROP_USER = "USER";
+
     protected static final String CONNECTION_PROP_USERNAME = "USERNAME";
 
     protected static final String CONNECTION_PROP_PASSWORD = "PASSWORD";
@@ -59,10 +61,19 @@ public class Driver implements java.sql.Driver {
     public Connection connect(String url, Properties info) throws SQLException {
         final Properties connProps = readConnectionProperties(url, info);
 
-        final String username = connProps.getProperty(CONNECTION_PROP_USERNAME);
-        final String password = connProps.getProperty(CONNECTION_PROP_PASSWORD) != null
-                ? connProps.getProperty(CONNECTION_PROP_PASSWORD) : "";
-        final String workspace = connProps.getProperty(CONNECTION_PROP_WORKSPACE);
+        String username = connProps.getProperty(CONNECTION_PROP_USERNAME);
+
+        if (username == null) {
+            username = connProps.getProperty(CONNECTION_PROP_USER);
+        }
+
+        String password = connProps.getProperty(CONNECTION_PROP_PASSWORD);
+
+        if (password == null) {
+            password = "";
+        }
+
+        String workspace = connProps.getProperty(CONNECTION_PROP_WORKSPACE);
 
         Credentials credentials = null;
 

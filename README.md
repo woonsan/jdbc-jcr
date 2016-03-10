@@ -15,11 +15,11 @@ JDBC Driver for JCR Repository
 Add the following dependency:
 
 ```xml
-            <dependency>
-                <groupId>com.github.woonsan</groupId>
-                <artifactId>jdbc-jcr</artifactId>
-                <version>${jdbc-jcr.version}</version>
-            </dependency>
+    <dependency>
+      <groupId>com.github.woonsan</groupId>
+      <artifactId>jdbc-jcr</artifactId>
+      <version>${jdbc-jcr.version}</version>
+    </dependency>
 ```
 
 # JDBC URLs

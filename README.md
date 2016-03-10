@@ -1,6 +1,6 @@
 # jdbc-jcr
 
-[![Build Status](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)](https://api.travis-ci.org/woonsan/jdbc-jcr.svg?branch=master)
+[![Build Status](https://travis-ci.org/woonsan/jdbc-jcr.svg?branch=develop)](https://travis-ci.org/woonsan/jdbc-jcr)
 [![Coverage Status](https://coveralls.io/repos/github/woonsan/jdbc-jcr/badge.svg?branch=develop)](https://coveralls.io/github/woonsan/jdbc-jcr?branch=develop)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.woonsan/jdbc-jcr.svg)](http://mvnrepository.com/artifact/com.github.woonsan/jdbc-jcr)
 
@@ -38,7 +38,7 @@ The third one is to lookup JNDI for the named repository. See the org.apache.jac
 for more details.
 The fourth one (with an empty location and repository parameters) is to create a TransientRepository.
 
-# Example to Create Connection
+# Example to create JDBC Connection
 
 ```java
         private Connection getConnection() throws SQLException {

@@ -52,6 +52,8 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     private final ValueFactory valueFactory;
 
+    private String queryLanguage = Query.SQL;
+
     private final Query query;
 
     private final Map<Integer, String> bindVariableNames = new LinkedHashMap<>();
@@ -61,7 +63,8 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
         try {
             valueFactory = connection.getJcrSession().getValueFactory();
-            query = connection.getJcrSession().getWorkspace().getQueryManager().createQuery(sql, Query.JCR_SQL2);
+            queryLanguage = SQLQueryUtils.detectQueryLanguage(sql);
+            query = connection.getJcrSession().getWorkspace().getQueryManager().createQuery(sql, queryLanguage);
 
             String [] varNames= query.getBindVariableNames();
 

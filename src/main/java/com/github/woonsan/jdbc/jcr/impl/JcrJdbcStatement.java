@@ -47,6 +47,7 @@ class JcrJdbcStatement implements Statement {
 
     private boolean closed;
 
+    private String queryLanguage = Query.SQL;
     private ResultSet currentResultSet;
 
     public JcrJdbcStatement(final JcrJdbcConnection connection) {
@@ -75,7 +76,8 @@ class JcrJdbcStatement implements Statement {
                 currentResultSet = null;
             }
 
-            Query query = connection.getJcrSession().getWorkspace().getQueryManager().createQuery(sql, Query.JCR_SQL2);
+            queryLanguage = SQLQueryUtils.detectQueryLanguage(sql);
+            Query query = connection.getJcrSession().getWorkspace().getQueryManager().createQuery(sql, queryLanguage);
 
             if (getMaxRows() > 0) {
                 query.setLimit(getMaxRows());

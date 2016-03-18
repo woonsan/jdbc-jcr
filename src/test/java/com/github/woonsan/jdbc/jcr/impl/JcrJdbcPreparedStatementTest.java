@@ -32,6 +32,13 @@ import org.junit.Test;
 public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestCase {
 
     private static final String SQL_EMPS =
+            "SELECT empno, ename, salary, hiredate "
+            + "FROM nt:unstructured "
+            + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
+            + "AND salary > 100010.0"
+            + "ORDER BY empno";
+
+    private static final String JCR_SQL2_EMPS =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('" + TEST_DATE_NODE_PATH + "') "
@@ -41,10 +48,32 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
     private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
 
     @Test
-    public void testExecuteQuery() throws Exception {
+    public void testExecuteSQLQuery() throws Exception {
         final int offset = 10;
 
         PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS);
+        // TODO: Variable binding in 'sql' query??
+        //pstmt.setDouble(1, 100000.0 + offset);
+        ResultSet rs = pstmt.executeQuery();
+
+        assertFalse(rs.isClosed());
+        assertTrue(rs.isBeforeFirst());
+        assertFalse(rs.isAfterLast());
+
+        int count = printResultSet(rs, offset);
+
+        assertEquals(getEmpRowCount() - offset, count);
+        assertFalse(rs.isBeforeFirst());
+        assertTrue(rs.isAfterLast());
+        rs.close();
+        assertTrue(rs.isClosed());
+    }
+
+    @Test
+    public void testExecuteJCR_SQL2Query() throws Exception {
+        final int offset = 10;
+
+        PreparedStatement pstmt = getConnection().prepareStatement(JCR_SQL2_EMPS);
         pstmt.setDouble(1, 100000.0 + offset);
         ResultSet rs = pstmt.executeQuery();
 
@@ -52,7 +81,17 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         assertTrue(rs.isBeforeFirst());
         assertFalse(rs.isAfterLast());
 
-        int i = 0;
+        int count = printResultSet(rs, offset);
+
+        assertEquals(getEmpRowCount() - offset, count);
+        assertFalse(rs.isBeforeFirst());
+        assertTrue(rs.isAfterLast());
+        rs.close();
+        assertTrue(rs.isClosed());
+    }
+
+    private int printResultSet(final ResultSet rs, final int offset) throws Exception {
+        int count = 0;
         long empno;
         String ename;
         double salary;
@@ -64,7 +103,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         System.out.println("==================================================");
 
         while (rs.next()) {
-            ++i;
+            ++count;
             empno = rs.getLong(1);
             ename = rs.getString(2);
             salary = rs.getDouble(3);
@@ -73,19 +112,15 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
             System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
                     new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
 
-            assertEquals(i + offset, empno);
-            assertEquals("Name " + (i + offset), ename);
-            assertEquals(100000.0 + (i + offset), salary, .1);
+            assertEquals(count + offset, empno);
+            assertEquals("Name " + (count + offset), ename);
+            assertEquals(100000.0 + (count + offset), salary, .1);
             assertEquals(getEmpHireDate().getTimeInMillis(), hireDate.getTime());
         }
 
         System.out.println("==================================================");
         System.out.println();
 
-        assertEquals(getEmpRowCount() - offset, i);
-        assertFalse(rs.isBeforeFirst());
-        assertTrue(rs.isAfterLast());
-        rs.close();
-        assertTrue(rs.isClosed());
+        return count;
     }
 }

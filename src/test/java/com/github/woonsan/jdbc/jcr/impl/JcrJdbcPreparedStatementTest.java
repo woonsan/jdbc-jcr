@@ -36,7 +36,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
             + "FROM nt:unstructured "
             + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
             + "AND salary > 100010.0"
-            + "ORDER BY empno";
+            + "ORDER BY empno ASC";
 
     private static final String JCR2_SQL_EMPS =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "

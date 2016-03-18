@@ -82,6 +82,11 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
         // - hiredate (date)
         //
 
+        //final String sql1 =
+        //    "SELECT empno, ename, salary, hiredate "
+        //    + "FROM nt:unstructured "
+        //    + "WHERE jcr:path like '/testdatafolder/%' "
+        //    + "ORDER BY empno ASC";
         final String sql1 =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
@@ -131,6 +136,13 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
 # Example with ```PreparedStatement```
 
 ```java
+
+        //final String sql2 =
+        //    "SELECT empno, ename, salary, hiredate "
+        //    + "FROM nt:unstructured "
+        //    + "WHERE jcr:path like '/testdatafolder/%' "
+        //    + "AND salary > 100010.0 "
+        //    + "ORDER BY empno ASC";
         final String sql2 =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
@@ -141,6 +153,7 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
         public void testPreparedStatement() throws SQLException {
             Connection conn = getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql2);
+            // FIXME: in 'sql' query (not JCR2_SQL), parameter binding doesn't work yet!
             pstmt.setDouble(1, 100010.0);
             ResultSet rs = pstmt.executeQuery();
             printResult(rs);

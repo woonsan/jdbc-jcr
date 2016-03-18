@@ -37,7 +37,7 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
             + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
             + "ORDER BY empno";
 
-    private static final String JCR_SQL2_EMPS =
+    private static final String JCR2_SQL_EMPS =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('" + TEST_DATE_NODE_PATH + "') "
@@ -66,7 +66,7 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
     @Test
     public void testExecuteJCR_SQL2Query() throws Exception {
         Statement statement = getConnection().createStatement();
-        ResultSet rs = statement.executeQuery(JCR_SQL2_EMPS);
+        ResultSet rs = statement.executeQuery(JCR2_SQL_EMPS);
 
         assertFalse(rs.isClosed());
         assertTrue(rs.isBeforeFirst());

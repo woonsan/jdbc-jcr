@@ -38,7 +38,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
             + "AND salary > 100010.0"
             + "ORDER BY empno";
 
-    private static final String JCR_SQL2_EMPS =
+    private static final String JCR2_SQL_EMPS =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('" + TEST_DATE_NODE_PATH + "') "
@@ -73,7 +73,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
     public void testExecuteJCR_SQL2Query() throws Exception {
         final int offset = 10;
 
-        PreparedStatement pstmt = getConnection().prepareStatement(JCR_SQL2_EMPS);
+        PreparedStatement pstmt = getConnection().prepareStatement(JCR2_SQL_EMPS);
         pstmt.setDouble(1, 100000.0 + offset);
         ResultSet rs = pstmt.executeQuery();
 

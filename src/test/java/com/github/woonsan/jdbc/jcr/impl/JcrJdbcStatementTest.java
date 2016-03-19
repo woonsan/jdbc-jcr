@@ -108,7 +108,7 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
                     rs.getString("jcr:path"), rs.getDouble("jcr:score")));
 
             assertEquals(count, empno);
-            assertEquals("Name " + count, ename);
+            assertEquals("Name' " + count, ename);
             assertEquals(100000.0 + count, salary, .1);
             assertEquals(getEmpHireDate().getTimeInMillis(), hireDate.getTime());
         }

@@ -64,7 +64,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
     @Test
     public void testExecuteSQLQueryByEmpName() throws Exception {
         PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
-        pstmt.setString(1, "Name 10");
+        pstmt.setString(1, "Name' 10");
         ResultSet rs = pstmt.executeQuery();
 
         assertFalse(rs.isClosed());
@@ -73,7 +73,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
 
         assertTrue(rs.next());
         assertEquals(10, rs.getInt("empno"));
-        assertEquals("Name 10", rs.getString("ename"));
+        assertEquals("Name' 10", rs.getString("ename"));
 
         assertFalse(rs.next());
 
@@ -86,7 +86,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
     @Test
     public void testExecuteJCR_SQL2QueryByEmpName() throws Exception {
         PreparedStatement pstmt = getConnection().prepareStatement(JCR2_SQL_EMPS_ENAME);
-        pstmt.setString(1, "Name 10");
+        pstmt.setString(1, "Name' 10");
         ResultSet rs = pstmt.executeQuery();
 
         assertFalse(rs.isClosed());
@@ -95,7 +95,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
 
         assertTrue(rs.next());
         assertEquals(10, rs.getInt("empno"));
-        assertEquals("Name 10", rs.getString("ename"));
+        assertEquals("Name' 10", rs.getString("ename"));
 
         assertFalse(rs.next());
 
@@ -172,7 +172,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
                     rs.getString("jcr:path"), rs.getDouble("jcr:score")));
 
             assertEquals(count + offset, empno);
-            assertEquals("Name " + (count + offset), ename);
+            assertEquals("Name' " + (count + offset), ename);
             assertEquals(100000.0 + (count + offset), salary, .1);
             assertEquals(getEmpHireDate().getTimeInMillis(), hireDate.getTime());
         }

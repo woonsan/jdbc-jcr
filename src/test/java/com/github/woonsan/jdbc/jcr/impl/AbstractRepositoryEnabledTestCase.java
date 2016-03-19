@@ -87,7 +87,7 @@ public class AbstractRepositoryEnabledTestCase {
         for (int i = 1; i <= empRowCount; i++) {
             dataNode = testDataFolderNode.addNode("testdata-" + i, "nt:unstructured");
             dataNode.setProperty("empno", i);
-            dataNode.setProperty("ename", "Name " + i);
+            dataNode.setProperty("ename", "Name' " + i);
             dataNode.setProperty("salary", 100000.0 + i);
             dataNode.setProperty("hiredate", empHireDate);
         }

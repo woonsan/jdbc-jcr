@@ -124,7 +124,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
                         value = parameters[i];
 
                         if (value instanceof String) {
-                            stringifiedValue = "'" + ((String) value) + "'";
+                            stringifiedValue = "'" + ((String) value).replaceAll("'", "''") + "'";
                         } else if (value instanceof Number || value instanceof Boolean) {
                             stringifiedValue = value.toString();
                         } else if (value instanceof Calendar) {

@@ -36,8 +36,8 @@ public class SQLQueryUtilsTest {
     private static final String CONV_SQL_EMPS =
             "SELECT empno, ename, salary, hiredate "
             + "FROM nt:unstructured "
-            + "WHERE ename = " + SQLQueryUtils.PARAM_VAR_PREFIX + 1 + " "
-            + "AND salary > " + SQLQueryUtils.PARAM_VAR_PREFIX + 2 + " "
+            + "WHERE ename = " + SQLQueryUtils.PARAM_VAR_REF_PREFIX + 1 + " "
+            + "AND salary > " + SQLQueryUtils.PARAM_VAR_REF_PREFIX + 2 + " "
             + "ORDER BY empno ASC";
 
     private static final String JCR2_SQL_EMPS =
@@ -50,8 +50,8 @@ public class SQLQueryUtilsTest {
     private static final String CONV_JCR2_SQL_EMPS =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
-            + "WHERE e.[ename] = " + SQLQueryUtils.PARAM_VAR_PREFIX + 1 + " "
-            + "AND e.[salary] > " + SQLQueryUtils.PARAM_VAR_PREFIX + 2 + " "
+            + "WHERE e.[ename] = " + SQLQueryUtils.PARAM_VAR_REF_PREFIX + 1 + " "
+            + "AND e.[salary] > " + SQLQueryUtils.PARAM_VAR_REF_PREFIX + 2 + " "
             + "ORDER BY e.[empno] ASC";
 
     @Test

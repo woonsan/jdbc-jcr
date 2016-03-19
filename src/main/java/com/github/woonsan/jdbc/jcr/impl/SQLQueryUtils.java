@@ -28,7 +28,9 @@ import javax.jcr.query.Query;
  */
 class SQLQueryUtils {
 
-    public static final String PARAM_VAR_PREFIX = "$_JDBC_JCR_PV_";
+    public static final String PARAM_VAR_PREFIX = "_JDBC_JCR_PV_";
+
+    public static final String PARAM_VAR_REF_PREFIX = "$" + PARAM_VAR_PREFIX;
 
     @SuppressWarnings("deprecation")
     private static final String DEFAULT_QUERY_LANGUAGE = Query.SQL;
@@ -42,7 +44,7 @@ class SQLQueryUtils {
     private SQLQueryUtils() {
     }
 
-    public static String detectQueryLanguage(final String query) {
+    static String detectQueryLanguage(final String query) {
         if (query == null) {
             throw new IllegalArgumentException("query statement is null.");
         }
@@ -56,7 +58,7 @@ class SQLQueryUtils {
         return DEFAULT_QUERY_LANGUAGE;
     }
 
-    public static int convertParameterBindingSqlToVariableBindingQuery(final String parameterBindingSql,
+    static int convertParameterBindingSqlToVariableBindingQuery(final String parameterBindingSql,
             final StringBuilder variableBindingQueryBuilder) {
         int paramCount = 0;
 
@@ -69,7 +71,7 @@ class SQLQueryUtils {
 
             variableBindingQueryBuilder.append(segment.subSequence(0, matcher.start())).append(matcher.group(1));
 
-            paramVariable = PARAM_VAR_PREFIX + paramCount;
+            paramVariable = PARAM_VAR_REF_PREFIX + paramCount;
             variableBindingQueryBuilder.append(paramVariable);
 
             variableBindingQueryBuilder.append(matcher.group(5));

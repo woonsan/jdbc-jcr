@@ -35,26 +35,26 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
             "SELECT empno, ename, salary, hiredate "
             + "FROM nt:unstructured "
             + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
-            + "AND ename = 'Name 10'";
+            + "AND ename = ?";
 
     private static final String JCR2_SQL_EMPS_ENAME =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('" + TEST_DATE_NODE_PATH + "') "
-            + "AND e.[ename] = $empName";
+            + "AND e.[ename] = ?";
 
     private static final String SQL_EMPS =
             "SELECT empno, ename, salary, hiredate "
             + "FROM nt:unstructured "
             + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
-            + "AND salary > 100010.0 "
+            + "AND salary > ? "
             + "ORDER BY empno ASC";
 
     private static final String JCR2_SQL_EMPS =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('" + TEST_DATE_NODE_PATH + "') "
-            + "AND e.[salary] > $salaryThreshold "
+            + "AND e.[salary] > ? "
             + "ORDER BY e.[empno] ASC";
 
     private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
@@ -62,8 +62,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
     @Test
     public void testExecuteSQLQueryByEmpName() throws Exception {
         PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
-        // TODO: Variable binding in 'sql' query??
-        //pstmt.setDouble(1, 100000.0 + offset);
+        pstmt.setString(1, "Name 10");
         ResultSet rs = pstmt.executeQuery();
 
         assertFalse(rs.isClosed());
@@ -109,8 +108,7 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         final int offset = 10;
 
         PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS);
-        // TODO: Variable binding in 'sql' query??
-        //pstmt.setDouble(1, 100000.0 + offset);
+        pstmt.setDouble(1, 100000.0 + offset);
         ResultSet rs = pstmt.executeQuery();
 
         assertFalse(rs.isClosed());

@@ -6,6 +6,7 @@ jdbc-jcr Changelog
 Fixed Issues:
 
 * Support both **sql** and **JCR2_SQL** query languages with automatic detection from the query statements.
+* More intuitive SQL parameters syntax and setting.
 
 ## jdbc-jcr 0.1.1
 

@@ -82,11 +82,14 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
         // - hiredate (date)
         //
 
+        // SQL statement example:
         //final String sql1 =
         //    "SELECT empno, ename, salary, hiredate "
         //    + "FROM nt:unstructured "
         //    + "WHERE jcr:path like '/testdatafolder/%' "
         //    + "ORDER BY empno ASC";
+
+        // JCR2_SQL statement example:
         final String sql1 =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
@@ -137,17 +140,20 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
 
 ```java
 
+        // SQL statement example:
         //final String sql2 =
         //    "SELECT empno, ename, salary, hiredate "
         //    + "FROM nt:unstructured "
         //    + "WHERE jcr:path like '/testdatafolder/%' "
-        //    + "AND salary > 100010.0 "
+        //    + "AND salary > ? "
         //    + "ORDER BY empno ASC";
+
+        // JCR2_SQL statement example:
         final String sql2 =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('/testdatafolder') "
-            + "AND e.[salary] > $salaryThreshold "
+            + "AND e.[salary] > ? "
             + "ORDER BY e.[empno] ASC";
 
         public void testPreparedStatement() throws SQLException {

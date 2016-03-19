@@ -59,6 +59,8 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
 
     private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
 
+    private static final String NODE_INFO_OUT_FORMAT = "\t--> %s, %s (%s), %f";
+
     @Test
     public void testExecuteSQLQueryByEmpName() throws Exception {
         PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
@@ -166,6 +168,8 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
 
             System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
                     new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
+            System.out.println(String.format(NODE_INFO_OUT_FORMAT, rs.getString("jcr:uuid"), rs.getString("jcr:name"),
+                    rs.getString("jcr:path"), rs.getDouble("jcr:score")));
 
             assertEquals(count + offset, empno);
             assertEquals("Name " + (count + offset), ename);

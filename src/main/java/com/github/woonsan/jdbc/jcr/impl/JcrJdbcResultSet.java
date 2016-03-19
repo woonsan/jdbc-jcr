@@ -212,8 +212,16 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
-            return value.getString();
+            if ("jcr:name".equals(columnLabel)) {
+                return currentRow.getNode().getName();
+            } else if ("jcr:path".equals(columnLabel)) {
+                return currentRow.getPath();
+            } else if ("jcr:uuid".equals(columnLabel)) {
+                return currentRow.getNode().getIdentifier();
+            } else {
+                Value value = getColumnValue(currentRow, columnLabel);
+                return value.getString();
+            }
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -301,8 +309,12 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
-            return value.getDouble();
+            if ("jcr:score".equals(columnLabel)) {
+                return currentRow.getScore();
+            } else {
+                Value value = getColumnValue(currentRow, columnLabel);
+                return value.getDouble();
+            }
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }

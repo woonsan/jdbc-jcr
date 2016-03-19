@@ -7,6 +7,7 @@ Fixed Issues:
 
 * Support both **sql** and **JCR2_SQL** query languages with automatic detection from the query statements.
 * More intuitive SQL parameters syntax and setting.
+* Supporting metadata columns: *jcr:name*, *jcr:path*, *jcr:uuid* and *jcr:score*.
 
 ## jdbc-jcr 0.1.1
 

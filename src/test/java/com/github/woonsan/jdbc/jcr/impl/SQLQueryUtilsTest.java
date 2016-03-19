@@ -26,6 +26,34 @@ import org.junit.Test;
 
 public class SQLQueryUtilsTest {
 
+    private static final String SQL_EMPS =
+            "SELECT empno, ename, salary, hiredate "
+            + "FROM nt:unstructured "
+            + "WHERE ename = ? "
+            + "AND salary > ? "
+            + "ORDER BY empno ASC";
+
+    private static final String CONV_SQL_EMPS =
+            "SELECT empno, ename, salary, hiredate "
+            + "FROM nt:unstructured "
+            + "WHERE ename = " + SQLQueryUtils.PARAM_VAR_PREFIX + 1 + " "
+            + "AND salary > " + SQLQueryUtils.PARAM_VAR_PREFIX + 2 + " "
+            + "ORDER BY empno ASC";
+
+    private static final String JCR2_SQL_EMPS =
+            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
+            + "FROM [nt:unstructured] AS e "
+            + "WHERE e.[ename] = ? "
+            + "AND e.[salary] > ? "
+            + "ORDER BY e.[empno] ASC";
+
+    private static final String CONV_JCR2_SQL_EMPS =
+            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
+            + "FROM [nt:unstructured] AS e "
+            + "WHERE e.[ename] = " + SQLQueryUtils.PARAM_VAR_PREFIX + 1 + " "
+            + "AND e.[salary] > " + SQLQueryUtils.PARAM_VAR_PREFIX + 2 + " "
+            + "ORDER BY e.[empno] ASC";
+
     @Test
     public void testSQLDetection() throws Exception {
         String query = "select * from ns1:news";
@@ -52,6 +80,31 @@ public class SQLQueryUtilsTest {
                 + "AND e.[salary] > $salaryThreshold "
                 + "ORDER BY e.[empno] ASC";
         assertEquals(Query.JCR_SQL2, SQLQueryUtils.detectQueryLanguage(query));
+    }
+
+    @Test
+    public void testConvertParameterBindingSqlToVariableBindingQuery() throws Exception {
+        StringBuilder jcrSqlBuilder = new StringBuilder();
+        int paramCount = SQLQueryUtils.convertParameterBindingSqlToVariableBindingQuery(SQL_EMPS, jcrSqlBuilder);
+        assertEquals(2, paramCount);
+        assertEquals(CONV_SQL_EMPS, jcrSqlBuilder.toString());
+
+        jcrSqlBuilder.delete(0, jcrSqlBuilder.length());
+        paramCount = SQLQueryUtils.convertParameterBindingSqlToVariableBindingQuery(JCR2_SQL_EMPS, jcrSqlBuilder);
+        assertEquals(2, paramCount);
+        assertEquals(CONV_JCR2_SQL_EMPS, jcrSqlBuilder.toString());
+
+        String query = "select empno, ename from nt:unstructured where empno > 10";
+        jcrSqlBuilder.delete(0, jcrSqlBuilder.length());
+        paramCount = SQLQueryUtils.convertParameterBindingSqlToVariableBindingQuery(query, jcrSqlBuilder);
+        assertEquals(0, paramCount);
+        assertEquals(query, jcrSqlBuilder.toString());
+
+        query = "select [empno], [ename] from [nt:unstructured] where [empno] > 10";
+        jcrSqlBuilder.delete(0, jcrSqlBuilder.length());
+        paramCount = SQLQueryUtils.convertParameterBindingSqlToVariableBindingQuery(query, jcrSqlBuilder);
+        assertEquals(0, paramCount);
+        assertEquals(query, jcrSqlBuilder.toString());
     }
 
 }

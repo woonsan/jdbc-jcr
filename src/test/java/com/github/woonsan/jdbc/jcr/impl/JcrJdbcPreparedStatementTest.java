@@ -31,11 +31,23 @@ import org.junit.Test;
 
 public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestCase {
 
+    private static final String SQL_EMPS_ENAME =
+            "SELECT empno, ename, salary, hiredate "
+            + "FROM nt:unstructured "
+            + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
+            + "AND ename = 'Name 10'";
+
+    private static final String JCR2_SQL_EMPS_ENAME =
+            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
+            + "FROM [nt:unstructured] AS e "
+            + "WHERE ISDESCENDANTNODE('" + TEST_DATE_NODE_PATH + "') "
+            + "AND e.[ename] = $empName";
+
     private static final String SQL_EMPS =
             "SELECT empno, ename, salary, hiredate "
             + "FROM nt:unstructured "
             + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
-            + "AND salary > 100010.0"
+            + "AND salary > 100010.0 "
             + "ORDER BY empno ASC";
 
     private static final String JCR2_SQL_EMPS =
@@ -46,6 +58,51 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
             + "ORDER BY e.[empno] ASC";
 
     private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
+
+    @Test
+    public void testExecuteSQLQueryByEmpName() throws Exception {
+        PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
+        // TODO: Variable binding in 'sql' query??
+        //pstmt.setDouble(1, 100000.0 + offset);
+        ResultSet rs = pstmt.executeQuery();
+
+        assertFalse(rs.isClosed());
+        assertTrue(rs.isBeforeFirst());
+        assertFalse(rs.isAfterLast());
+
+        assertTrue(rs.next());
+        assertEquals(10, rs.getInt("empno"));
+        assertEquals("Name 10", rs.getString("ename"));
+
+        assertFalse(rs.next());
+
+        assertFalse(rs.isBeforeFirst());
+        assertTrue(rs.isAfterLast());
+        rs.close();
+        assertTrue(rs.isClosed());
+    }
+
+    @Test
+    public void testExecuteJCR_SQL2QueryByEmpName() throws Exception {
+        PreparedStatement pstmt = getConnection().prepareStatement(JCR2_SQL_EMPS_ENAME);
+        pstmt.setString(1, "Name 10");
+        ResultSet rs = pstmt.executeQuery();
+
+        assertFalse(rs.isClosed());
+        assertTrue(rs.isBeforeFirst());
+        assertFalse(rs.isAfterLast());
+
+        assertTrue(rs.next());
+        assertEquals(10, rs.getInt("empno"));
+        assertEquals("Name 10", rs.getString("ename"));
+
+        assertFalse(rs.next());
+
+        assertFalse(rs.isBeforeFirst());
+        assertTrue(rs.isAfterLast());
+        rs.close();
+        assertTrue(rs.isClosed());
+    }
 
     @Test
     public void testExecuteSQLQuery() throws Exception {

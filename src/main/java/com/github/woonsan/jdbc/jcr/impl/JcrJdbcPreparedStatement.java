@@ -52,11 +52,12 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     private final ValueFactory valueFactory;
 
+    @SuppressWarnings("deprecation")
     private String queryLanguage = Query.SQL;
 
-    private final Query query;
+    private Query query;
 
-    private final Map<Integer, String> bindVariableNames = new LinkedHashMap<>();
+    private Map<Integer, String> bindVariableNamesMap;
 
     public JcrJdbcPreparedStatement(final JcrJdbcConnection connection, final String sql) throws SQLException {
         super(connection);
@@ -67,9 +68,10 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
             query = connection.getJcrSession().getWorkspace().getQueryManager().createQuery(sql, queryLanguage);
 
             String [] varNames= query.getBindVariableNames();
+            bindVariableNamesMap = new LinkedHashMap<>();
 
             for (int i = 0; i < varNames.length; i++) {
-                bindVariableNames.put(i + 1, varNames[i]);
+                bindVariableNamesMap.put(i + 1, varNames[i]);
             }
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -107,8 +109,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     @Override
     public void setBoolean(int parameterIndex, boolean x) throws SQLException {
         try {
-            Value value = getValueFactory().createValue(x);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, x);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -132,8 +133,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     @Override
     public void setLong(int parameterIndex, long x) throws SQLException {
         try {
-            Value value = getValueFactory().createValue((long) x);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, x);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -147,8 +147,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     @Override
     public void setDouble(int parameterIndex, double x) throws SQLException {
         try {
-            Value value = getValueFactory().createValue((double) x);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, x);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -157,8 +156,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     @Override
     public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
         try {
-            Value value = getValueFactory().createValue(x);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, x);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -167,8 +165,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     @Override
     public void setString(int parameterIndex, String x) throws SQLException {
         try {
-            Value value = getValueFactory().createValue(x);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, x);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -269,8 +266,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
         try {
             Calendar calendarValue = cal != null ? (Calendar) cal.clone() : Calendar.getInstance();
             calendarValue.setTimeInMillis(x.getTime());
-            Value value = getValueFactory().createValue(calendarValue);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, calendarValue);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -281,8 +277,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
         try {
             Calendar calendarValue = cal != null ? (Calendar) cal.clone() : Calendar.getInstance();
             calendarValue.setTimeInMillis(x.getTime());
-            Value value = getValueFactory().createValue(calendarValue);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, calendarValue);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -293,8 +288,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
         try {
             Calendar calendarValue = cal != null ? (Calendar) cal.clone() : Calendar.getInstance();
             calendarValue.setTimeInMillis(x.getTime());
-            Value value = getValueFactory().createValue(calendarValue);
-            query.bindValue(findBindVariableName(parameterIndex), value);
+            bindParameter(parameterIndex, calendarValue);
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -414,11 +408,41 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
         return valueFactory;
     }
 
+    private void bindParameter(final int parameterIndex, final boolean x) throws RepositoryException, SQLException {
+        Value value = getValueFactory().createValue(x);
+        query.bindValue(findBindVariableName(parameterIndex), value);
+    }
+
+    private void bindParameter(final int parameterIndex, final long x) throws RepositoryException, SQLException {
+        Value value = getValueFactory().createValue(x);
+        query.bindValue(findBindVariableName(parameterIndex), value);
+    }
+
+    private void bindParameter(final int parameterIndex, final double x) throws RepositoryException, SQLException {
+        Value value = getValueFactory().createValue(x);
+        query.bindValue(findBindVariableName(parameterIndex), value);
+    }
+
+    private void bindParameter(final int parameterIndex, final BigDecimal x) throws RepositoryException, SQLException {
+        Value value = getValueFactory().createValue(x);
+        query.bindValue(findBindVariableName(parameterIndex), value);
+    }
+
+    private void bindParameter(final int parameterIndex, final String x) throws RepositoryException, SQLException {
+        Value value = getValueFactory().createValue(x);
+        query.bindValue(findBindVariableName(parameterIndex), value);
+    }
+
+    private void bindParameter(final int parameterIndex, final Calendar x) throws RepositoryException, SQLException {
+        Value value = getValueFactory().createValue(x);
+        query.bindValue(findBindVariableName(parameterIndex), value);
+    }
+
     private String findBindVariableName(int parameterIndex) throws SQLException {
-        if (!bindVariableNames.containsKey(parameterIndex)) {
-            throw new SQLException("Invalid parameter index. Parameters: " + bindVariableNames);
+        if (!bindVariableNamesMap.containsKey(parameterIndex)) {
+            throw new SQLException("Invalid parameter index. Parameters: " + bindVariableNamesMap);
         }
 
-        return bindVariableNames.get(parameterIndex);
+        return bindVariableNamesMap.get(parameterIndex);
     }
 }

@@ -33,6 +33,7 @@ class JcrJdbcStatement implements Statement {
     private JcrJdbcConnection connection;
     private int maxFieldSize;
     private int maxRows;
+    @SuppressWarnings("unused")
     private boolean escapeProcessing = true;
     private int queryTimeout;
     private int updateCount = -1;
@@ -47,6 +48,7 @@ class JcrJdbcStatement implements Statement {
 
     private boolean closed;
 
+    @SuppressWarnings("deprecation")
     private String queryLanguage = Query.SQL;
     private ResultSet currentResultSet;
 

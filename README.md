@@ -159,7 +159,6 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
         public void testPreparedStatement() throws SQLException {
             Connection conn = getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql2);
-            // FIXME: in 'sql' query (not JCR2_SQL), parameter binding doesn't work yet!
             pstmt.setDouble(1, 100010.0);
             ResultSet rs = pstmt.executeQuery();
             printResult(rs);

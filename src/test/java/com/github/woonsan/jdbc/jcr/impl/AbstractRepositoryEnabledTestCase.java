@@ -19,6 +19,7 @@
 package com.github.woonsan.jdbc.jcr.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Properties;
@@ -27,6 +28,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 
@@ -46,11 +48,7 @@ public class AbstractRepositoryEnabledTestCase {
 
     @Before
     public void setUp() throws Exception {
-        File repoLockFile = new File("repository/.lock");
-
-        if (repoLockFile.isFile()) {
-            repoLockFile.delete();
-        }
+        deleteTransientRepositoryFolderAndConfig();
 
         jdbcDriver = new Driver();
         Properties info = new Properties();
@@ -74,6 +72,10 @@ public class AbstractRepositoryEnabledTestCase {
     @After
     public void tearDown() throws Exception {
         connection.close();
+
+        ((Driver) jdbcDriver).shutdownTransientRepositories();
+
+        deleteTransientRepositoryFolderAndConfig();
     }
 
     protected Connection getConnection() {
@@ -100,4 +102,17 @@ public class AbstractRepositoryEnabledTestCase {
         }
     }
 
+    private void deleteTransientRepositoryFolderAndConfig() throws IOException {
+        File repoDir = new File(TestConstants.TEST_REPOSITORY_HOME);
+
+        if (repoDir.exists()) {
+            FileUtils.forceDelete(repoDir);
+        }
+
+        File repoConf = new File(TestConstants.TEST_REPOSITORY_CONF);
+
+        if (repoConf.exists()) {
+            FileUtils.forceDelete(repoConf);
+        }
+    }
 }

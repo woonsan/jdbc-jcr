@@ -18,6 +18,7 @@
  */
 package com.github.woonsan.jdbc.jcr.impl;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Properties;
@@ -45,6 +46,12 @@ public class AbstractRepositoryEnabledTestCase {
 
     @Before
     public void setUp() throws Exception {
+        File repoLockFile = new File("repository/.lock");
+
+        if (repoLockFile.isFile()) {
+            repoLockFile.delete();
+        }
+
         jdbcDriver = new Driver();
         Properties info = new Properties();
         info.setProperty("username", "admin");

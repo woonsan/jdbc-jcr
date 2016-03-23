@@ -29,7 +29,7 @@ class BinaryUtils {
     private BinaryUtils() {
     }
 
-    public static byte [] readBinary(final Binary binary) throws RepositoryException, IOException {
+    static byte [] readBinary(final Binary binary) throws RepositoryException, IOException {
         byte [] bytes = null;
 
         try {
@@ -48,7 +48,7 @@ class BinaryUtils {
         return bytes;
     }
 
-    public static InputStream createBinaryInputStream(final Binary binary) throws RepositoryException, IOException {
+    static InputStream createBinaryInputStream(final Binary binary) throws RepositoryException, IOException {
         return new BinaryInputStream(binary);
     }
 

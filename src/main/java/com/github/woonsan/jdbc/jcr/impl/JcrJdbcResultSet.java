@@ -41,7 +41,6 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -213,8 +212,16 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
-            return value.getString();
+            if ("jcr:name".equals(columnLabel)) {
+                return currentRow.getNode().getName();
+            } else if ("jcr:path".equals(columnLabel)) {
+                return currentRow.getPath();
+            } else if ("jcr:uuid".equals(columnLabel)) {
+                return currentRow.getNode().getIdentifier();
+            } else {
+                Value value = getColumnValue(currentRow, columnLabel);
+                return value.getString();
+            }
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -227,7 +234,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return value.getBoolean();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -246,7 +253,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return (short) value.getLong();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -260,7 +267,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return (int) value.getLong();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -274,7 +281,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return value.getLong();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -288,7 +295,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return (float) value.getDouble();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -302,8 +309,12 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
-            return value.getDouble();
+            if ("jcr:score".equals(columnLabel)) {
+                return currentRow.getScore();
+            } else {
+                Value value = getColumnValue(currentRow, columnLabel);
+                return value.getDouble();
+            }
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
         }
@@ -323,7 +334,7 @@ class JcrJdbcResultSet implements ResultSet {
         byte [] bytes = null;
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
 
             if (value.getType() != PropertyType.BINARY) {
                 throw new SQLException("Not a binary field.");
@@ -353,7 +364,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return new Date(value.getDate().getTimeInMillis());
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -367,7 +378,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return new Time(value.getDate().getTimeInMillis());
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -381,7 +392,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return new Timestamp(value.getDate().getTimeInMillis());
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -407,7 +418,7 @@ class JcrJdbcResultSet implements ResultSet {
         InputStream binaryStream = null;
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
 
             if (value.getType() != PropertyType.BINARY) {
                 throw new SQLException("Not a binary field.");
@@ -499,7 +510,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = currentRow.getValue(columnLabel);
+            Value value = getColumnValue(currentRow, columnLabel);
             return value.getDecimal();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -946,19 +957,7 @@ class JcrJdbcResultSet implements ResultSet {
 
     @Override
     public Array getArray(String columnLabel) throws SQLException {
-        if (isClosed()) {
-            throw new SQLException("ResultSet was already closed.");
-        }
-
-        Array array = null;
-
-        try {
-            array = new JcrValueArray(currentRow.getValues());
-        } catch (RepositoryException e) {
-            throw new SQLException(e.toString(), e);
-        }
-
-        return array;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -1305,92 +1304,7 @@ class JcrJdbcResultSet implements ResultSet {
         return columnNames[columnIndex - 1];
     }
 
-    static class JcrValueArray implements Array {
-
-        private final Object [] valueObjects;
-
-        JcrValueArray(Value [] values) throws RepositoryException, SQLException {
-            valueObjects = new Object[values.length];
-            int type;
-
-            for (int i = 0; i < values.length; i++) {
-                type = values[i].getType();
-
-                if (type == PropertyType.STRING) {
-                    valueObjects[i] = values[i].getString();
-                } else if (type == PropertyType.BOOLEAN) {
-                        valueObjects[i] = values[i].getBoolean();
-                } else if (type == PropertyType.LONG) {
-                        valueObjects[i] = values[i].getLong();
-                } else if (type == PropertyType.DOUBLE) {
-                        valueObjects[i] = values[i].getDouble();
-                } else if (type == PropertyType.DECIMAL) {
-                        valueObjects[i] = values[i].getDecimal();
-                } else if (type == PropertyType.DATE) {
-                        valueObjects[i] = values[i].getDate();
-                } else {
-                    throw new SQLFeatureNotSupportedException(
-                            "Array not supported for " + PropertyType.nameFromValue(type));
-                }
-            }
-        }
-
-        @Override
-        public Object getArray() {
-            return valueObjects;
-        }
-
-        @Override
-        public Object getArray(Map<String, Class<?>> map) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public Object getArray(long index, int count) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public Object getArray(long index, int count, Map<String, Class<?>> map)
-                throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public int getBaseType() {
-            return Types.NULL;
-        }
-
-        @Override
-        public String getBaseTypeName() {
-            return "NULL";
-        }
-
-        @Override
-        public ResultSet getResultSet() throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public ResultSet getResultSet(Map<String, Class<?>> map)
-                throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public ResultSet getResultSet(long index, int count)
-                throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public ResultSet getResultSet(long index, int count,
-                Map<String, Class<?>> map) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public void free() {
-        }
+    private Value getColumnValue(final Row row, final String columnName) throws RepositoryException {
+        return currentRow.getValue(columnName);
     }
 }

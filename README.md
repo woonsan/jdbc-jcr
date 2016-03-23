@@ -1,6 +1,7 @@
 # jdbc-jcr
 
 [![Build Status](https://travis-ci.org/woonsan/jdbc-jcr.svg?branch=develop)](https://travis-ci.org/woonsan/jdbc-jcr)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/woonsan/jdbc-jcr/develop/LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/woonsan/jdbc-jcr/badge.svg?branch=develop)](https://coveralls.io/github/woonsan/jdbc-jcr?branch=develop)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.woonsan/jdbc-jcr.svg)](http://mvnrepository.com/artifact/com.github.woonsan/jdbc-jcr)
 
@@ -8,7 +9,7 @@ JDBC Driver for JCR Repository
 
 # Introduction
 
-**jdbc-jcr** provides a JDBC Driver for JCR Repository using JCR2_SQL query language.
+**jdbc-jcr** provides a JDBC Driver for JCR Repository using **sql** or **JCR2_SQL** query languages.
 
 # How to Add this module in my Project
 
@@ -81,6 +82,14 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
         // - hiredate (date)
         //
 
+        // SQL statement example:
+        //final String sql1 =
+        //    "SELECT empno, ename, salary, hiredate "
+        //    + "FROM nt:unstructured "
+        //    + "WHERE jcr:path like '/testdatafolder/%' "
+        //    + "ORDER BY empno ASC";
+
+        // JCR2_SQL statement example:
         final String sql1 =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
@@ -130,11 +139,21 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
 # Example with ```PreparedStatement```
 
 ```java
+
+        // SQL statement example:
+        //final String sql2 =
+        //    "SELECT empno, ename, salary, hiredate "
+        //    + "FROM nt:unstructured "
+        //    + "WHERE jcr:path like '/testdatafolder/%' "
+        //    + "AND salary > ? "
+        //    + "ORDER BY empno ASC";
+
+        // JCR2_SQL statement example:
         final String sql2 =
             "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('/testdatafolder') "
-            + "AND e.[salary] > $salaryThreshold "
+            + "AND e.[salary] > ? "
             + "ORDER BY e.[empno] ASC";
 
         public void testPreparedStatement() throws SQLException {

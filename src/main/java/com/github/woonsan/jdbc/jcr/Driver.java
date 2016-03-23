@@ -25,7 +25,9 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.jcr.Credentials;
@@ -56,6 +58,8 @@ public class Driver implements java.sql.Driver {
     protected static final String REPO_CONF_PROPERTY = "REPOSITORY.CONF";
 
     protected static final String REPO_HOME_PROPERTY = "REPOSITORY.HOME";
+
+    private volatile Map<Properties, Repository> repositoryMap = new ConcurrentHashMap<>();
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
@@ -135,19 +139,44 @@ public class Driver implements java.sql.Driver {
         throw new SQLFeatureNotSupportedException();
     }
 
-    protected Repository getRepository(final Properties connProps) throws SQLException {
-        Repository repository = null;
-
-        try {
-            final String location = connProps.getProperty(CONNECTION_PROP_LOCATION);
-
-            if (location == null || "".equals(location.trim())) {
-                repository = getTransientRepository(connProps);
-            } else {
-                repository = JcrUtils.getRepository(location);
+    public synchronized void shutdownTransientRepositories() {
+        for (Repository repository : repositoryMap.values()) {
+            if (repository instanceof TransientRepository) {
+                ((TransientRepository) repository).shutdown();
             }
-        } catch (RepositoryException e) {
-            throw new SQLException("Cannot get JCR repository. " + e.toString(), e);
+        }
+    }
+
+    protected Repository getRepository(final Properties connProps) throws SQLException {
+        Map<Properties, Repository> repoMap = repositoryMap;
+        Repository repository = repoMap.get(connProps);
+
+        if (repository == null) {
+            synchronized (this) {
+                repoMap = repositoryMap;
+                repository = repoMap.get(connProps);
+
+                if (repository == null) {
+                    try {
+                        Repository repo = null;
+
+                        final String location = connProps.getProperty(CONNECTION_PROP_LOCATION);
+
+                        if (location == null || "".equals(location.trim())) {
+                            repo = getTransientRepository(connProps);
+                        } else {
+                            repo = JcrUtils.getRepository(location);
+                        }
+
+                        repoMap.put(connProps, repo);
+                        repositoryMap = repoMap;
+
+                        repository = repo;
+                    } catch (RepositoryException e) {
+                        throw new SQLException("Cannot get JCR repository. " + e.toString(), e);
+                    }
+                }
+            }
         }
 
         return repository;

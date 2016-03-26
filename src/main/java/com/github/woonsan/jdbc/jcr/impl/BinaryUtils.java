@@ -32,17 +32,13 @@ class BinaryUtils {
     static byte [] readBinary(final Binary binary) throws RepositoryException, IOException {
         byte [] bytes = null;
 
-        try {
-            bytes = new byte[(int) binary.getSize()];
-            long position = 0;
-            int readLen = binary.read(bytes, position);
+        bytes = new byte[(int) binary.getSize()];
+        long position = 0;
+        int readLen = binary.read(bytes, position);
 
-            while (readLen != -1) {
-                position += readLen;
-                readLen = binary.read(bytes, position);
-            }
-        } finally {
-            
+        while (readLen != -1) {
+            position += readLen;
+            readLen = binary.read(bytes, position);
         }
 
         return bytes;

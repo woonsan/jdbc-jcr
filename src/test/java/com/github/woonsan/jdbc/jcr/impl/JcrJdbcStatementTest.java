@@ -20,6 +20,7 @@ package com.github.woonsan.jdbc.jcr.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -51,7 +52,41 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
     @Test
     public void testExecuteSQLQuery() throws Exception {
         Statement statement = getConnection().createStatement();
+        assertSame(getConnection(), statement.getConnection());
+        assertFalse(statement.isClosed());
+        assertFalse(statement.isPoolable());
+        statement.setPoolable(true);
+        assertTrue(statement.isPoolable());
+        statement.setPoolable(false);
+        assertFalse(statement.isCloseOnCompletion());
+        statement.closeOnCompletion();
+        assertTrue(statement.isCloseOnCompletion());
+
+        statement.setMaxFieldSize(4096);
+        assertEquals(4096, statement.getMaxFieldSize());
+        statement.setMaxRows(1000);
+        assertEquals(1000, statement.getMaxRows());
+        assertTrue(((JcrJdbcStatement) statement).isEscapeProcessing());
+        statement.setEscapeProcessing(false);
+        assertFalse(((JcrJdbcStatement) statement).isEscapeProcessing());
+        statement.setQueryTimeout(30);
+        assertEquals(30, statement.getQueryTimeout());
+
+        assertEquals(ResultSet.FETCH_FORWARD, statement.getFetchDirection());
+        statement.setFetchDirection(ResultSet.FETCH_REVERSE);
+        assertEquals(ResultSet.FETCH_REVERSE, statement.getFetchDirection());
+        statement.setFetchDirection(ResultSet.FETCH_FORWARD);
+        statement.setFetchSize(500);
+        assertEquals(500, statement.getFetchSize());
+        assertEquals(ResultSet.CONCUR_READ_ONLY, statement.getResultSetConcurrency());
+        assertEquals(ResultSet.TYPE_FORWARD_ONLY, statement.getResultSetType());
+        assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT, statement.getResultSetHoldability());
+
         ResultSet rs = statement.executeQuery(SQL_EMPS);
+        assertSame(rs, statement.getResultSet());
+        assertEquals(-1, statement.getUpdateCount());
+        assertFalse(statement.getMoreResults());
+        assertFalse(statement.getMoreResults(Statement.KEEP_CURRENT_RESULT));
 
         assertFalse(rs.isClosed());
         assertTrue(rs.isBeforeFirst());

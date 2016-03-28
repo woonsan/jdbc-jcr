@@ -21,6 +21,7 @@ package com.github.woonsan.jdbc.jcr.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -63,6 +64,9 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
         assertTrue(rs.isAfterLast());
         rs.close();
         assertTrue(rs.isClosed());
+
+        statement.close();
+        assertTrue(statement.isClosed());
     }
 
     @Test
@@ -81,6 +85,106 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
         assertTrue(rs.isAfterLast());
         rs.close();
         assertTrue(rs.isClosed());
+
+        statement.close();
+        assertTrue(statement.isClosed());
+    }
+
+    @Test
+    public void testUnsupportedOperations() throws Exception {
+        Statement statement = getConnection().createStatement();
+
+        try {
+            statement.isWrapperFor(null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.unwrap(null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.executeUpdate(null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.executeUpdate(null, 1);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.executeUpdate(null, new int [] { 1, 2 });
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.executeUpdate(null, new String [] { "col1", "col2" });
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.execute(null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.execute(null, 1);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.execute(null, new int [] { 1, 2 } );
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.execute(null, new String [] { "col1", "col2" });
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.cancel();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.getWarnings();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.clearWarnings();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.setCursorName(null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.addBatch(null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.executeBatch();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.clearBatch();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            statement.getGeneratedKeys();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        statement.close();
     }
 
     private int printResultSet(final ResultSet rs) throws Exception {

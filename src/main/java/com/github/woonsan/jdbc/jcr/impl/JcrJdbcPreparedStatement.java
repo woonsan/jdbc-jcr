@@ -72,9 +72,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
             parametersCount = SQLQueryUtils.convertParameterBindingSqlToVariableBindingQuery(queryStatement,
                     jcrQueryBuilder);
 
-            if (parametersCount > 0) {
-                parameters = new Object[parametersCount];
-            }
+            parameters = new Object[parametersCount];
 
             jcrQueryStatement = jcrQueryBuilder.toString();
             queryLanguage = SQLQueryUtils.detectQueryLanguage(jcrQueryStatement);
@@ -250,7 +248,9 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     @Override
     public void clearParameters() throws SQLException {
-        throw new UnsupportedOperationException();
+        for (int i = 0; i < parametersCount; i++) {
+            parameters[i] = null;
+        }
     }
 
     @Override

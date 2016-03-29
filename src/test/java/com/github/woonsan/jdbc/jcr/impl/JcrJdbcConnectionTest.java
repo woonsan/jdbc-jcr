@@ -18,9 +18,16 @@
  */
 package com.github.woonsan.jdbc.jcr.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.Properties;
 
 import org.junit.Test;
 
@@ -29,6 +36,54 @@ public class JcrJdbcConnectionTest extends AbstractRepositoryEnabledTestCase {
     @Test
     public void testConnection() throws Exception {
         Connection conn = getConnection();
+
+        assertNull(conn.getMetaData());
+
+        assertFalse(conn.getAutoCommit());
+        conn.setAutoCommit(true);
+        assertTrue(conn.getAutoCommit());
+        conn.setAutoCommit(false);
+
+        assertTrue(conn.isReadOnly());
+        conn.setReadOnly(true);
+        assertTrue(conn.isReadOnly());
+
+        assertEquals(Connection.TRANSACTION_NONE, conn.getTransactionIsolation());
+        conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        assertEquals(Connection.TRANSACTION_READ_UNCOMMITTED, conn.getTransactionIsolation());
+        conn.setTransactionIsolation(Connection.TRANSACTION_NONE);
+
+        assertNull(conn.getWarnings());
+        conn.clearWarnings();
+
+        assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT, conn.getHoldability());
+        conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, conn.getHoldability());
+        conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+
+        conn.commit();
+        conn.rollback();
+
+        assertTrue(conn.isValid(0));
+
+        conn.setClientInfo("prop1", "value1");
+        Properties props = new Properties();
+        props.setProperty("prop2", "value2");
+        props.setProperty("prop3", "value3");
+        conn.setClientInfo(props);
+        assertEquals("value1", conn.getClientInfo("prop1"));
+        assertEquals("value2", conn.getClientInfo("prop2"));
+        assertEquals("value3", conn.getClientInfo("prop3"));
+        Properties props2 = conn.getClientInfo();
+        assertEquals("value1", props2.getProperty("prop1"));
+        assertEquals("value2", props2.getProperty("prop2"));
+        assertEquals("value3", props2.getProperty("prop3"));
+
+        assertNotNull(((JcrJdbcConnection) conn).getJcrSession());
+
+        assertFalse(conn.isClosed());
+        conn.close();
+        assertTrue(conn.isClosed());
     }
 
     @Test

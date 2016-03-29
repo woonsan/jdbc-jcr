@@ -82,6 +82,8 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
         assertEquals(ResultSet.TYPE_FORWARD_ONLY, statement.getResultSetType());
         assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT, statement.getResultSetHoldability());
 
+        assertEquals(SQL_EMPS, getConnection().nativeSQL(SQL_EMPS));
+
         ResultSet rs = statement.executeQuery(SQL_EMPS);
         assertSame(rs, statement.getResultSet());
         assertEquals(-1, statement.getUpdateCount());

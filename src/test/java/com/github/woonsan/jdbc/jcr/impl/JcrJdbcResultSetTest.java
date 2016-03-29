@@ -20,6 +20,7 @@ package com.github.woonsan.jdbc.jcr.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -32,6 +33,8 @@ import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -55,10 +58,20 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
     public void testExecuteSQLQuery() throws Exception {
         Statement statement = getConnection().createStatement();
         ResultSet rs = statement.executeQuery(SQL_EMPS);
+        assertSame(statement, rs.getStatement());
+
+        assertEquals(ResultSet.TYPE_FORWARD_ONLY, rs.getType());
+        assertEquals(ResultSet.CONCUR_READ_ONLY, rs.getConcurrency());
+        assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT, rs.getHoldability());
 
         assertFalse(rs.isClosed());
         assertTrue(rs.isBeforeFirst());
         assertFalse(rs.isAfterLast());
+
+        assertEquals(1, rs.findColumn("empno"));
+        assertEquals(2, rs.findColumn("ename"));
+        assertEquals(3, rs.findColumn("salary"));
+        assertEquals(4, rs.findColumn("hiredate"));
 
         int count = printResultSet(rs);
 
@@ -70,6 +83,38 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
         statement.close();
         assertTrue(statement.isClosed());
+    }
+
+    @Test
+    public void testGetMetaData() throws Exception {
+        Statement statement = getConnection().createStatement();
+        ResultSet rs = statement.executeQuery(SQL_EMPS);
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        // When 'sql' query used, jcr adds 'jcr:path' and 'jcr:score' columns automatically.
+        assertEquals(4 + 2, metaData.getColumnCount());
+
+        assertEquals("empno", metaData.getColumnName(1));
+        assertEquals("ename", metaData.getColumnName(2));
+        assertEquals("salary", metaData.getColumnName(3));
+        assertEquals("hiredate", metaData.getColumnName(4));
+
+        assertEquals("empno", metaData.getColumnLabel(1));
+        assertEquals("ename", metaData.getColumnLabel(2));
+        assertEquals("salary", metaData.getColumnLabel(3));
+        assertEquals("hiredate", metaData.getColumnLabel(4));
+
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            assertFalse(metaData.isAutoIncrement(i));
+            assertTrue(metaData.isCaseSensitive(i));
+            assertTrue(metaData.isSearchable(i));
+            assertTrue(metaData.isReadOnly(i));
+            assertFalse(metaData.isWritable(i));
+            assertFalse(metaData.isDefinitelyWritable(i));
+        }
+
+        rs.close();
+        statement.close();
     }
 
     @Test
@@ -751,10 +796,10 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
     private int printResultSet(final ResultSet rs) throws Exception {
         int count = 0;
-        long empno;
-        String ename;
-        double salary;
-        Date hireDate;
+        long empno, empno2;
+        String ename, ename2;
+        double salary, salary2;
+        Date hireDate, hireDate2;
 
         System.out.println();
         System.out.println("==================================================");
@@ -763,10 +808,30 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
         while (rs.next()) {
             ++count;
+
+            if (count == 1) {
+                assertTrue(rs.isFirst());
+            } else {
+                assertFalse(rs.isFirst());
+            }
+
+            assertEquals(count, rs.getRow());
+
             empno = rs.getLong(1);
+            assertFalse(rs.wasNull());
+            empno2 = rs.getLong("empno");
+            assertEquals(empno, empno2);
             ename = rs.getString(2);
+            ename2 = rs.getString("ename");
+            assertEquals(ename, ename2);
             salary = rs.getDouble(3);
+            salary2 = rs.getDouble("salary");
+            assertEquals(salary, salary2, 0.001);
             hireDate = rs.getDate(4);
+            hireDate2 = rs.getDate("hiredate");
+            assertEquals(hireDate, hireDate2);
+
+            assertNonExistingColumn(rs);
 
             System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
                     new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
@@ -777,11 +842,232 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             assertEquals("Name' " + count, ename);
             assertEquals(100000.0 + count, salary, .1);
             assertEquals(getEmpHireDate().getTimeInMillis(), hireDate.getTime());
+
+            assertFalse(rs.rowUpdated());
+            assertFalse(rs.rowInserted());
+            assertFalse(rs.rowDeleted());
         }
 
         System.out.println("==================================================");
         System.out.println();
 
         return count;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void assertNonExistingColumn(final ResultSet rs) throws Exception {
+        int nonExistingColIndex = Integer.MAX_VALUE;
+        String nonExistingColName = "col" + nonExistingColIndex;
+
+        try {
+            rs.getString(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getString(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBoolean(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBoolean(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getByte(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getByte(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getShort(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getShort(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getInt(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getInt(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getLong(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getLong(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getFloat(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getFloat(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDouble(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDouble(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBigDecimal(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBigDecimal(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBigDecimal(nonExistingColIndex, 1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBigDecimal(nonExistingColName, 1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBytes(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBytes(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate(nonExistingColIndex, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate(nonExistingColName, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime(nonExistingColIndex, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime(nonExistingColName, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp(nonExistingColIndex, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp(nonExistingColName, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getAsciiStream(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getAsciiStream(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getUnicodeStream(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getUnicodeStream(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBinaryStream(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBinaryStream(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getCharacterStream(nonExistingColIndex);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getCharacterStream(nonExistingColName);
+            fail();
+        } catch (SQLException ignore) {}
+
     }
 }

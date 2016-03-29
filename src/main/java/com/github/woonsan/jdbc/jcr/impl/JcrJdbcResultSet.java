@@ -56,6 +56,8 @@ class JcrJdbcResultSet implements ResultSet {
 
     private Statement statement;
     private final String [] columnNames;
+    private int jcrPathColumnIndex;
+    private int jcrScoreColumnIndex;
     private ResultSetMetaData resultSetMetaData;
     private RowIterator rowIterator;
     private Row currentRow;
@@ -75,7 +77,16 @@ class JcrJdbcResultSet implements ResultSet {
         try {
             String [] cnames = queryResult.getColumnNames();
             columnNames = new String[cnames.length];
-            System.arraycopy(cnames, 0, columnNames, 0, cnames.length);
+
+            for (int i = 0; i < cnames.length; i++) {
+                columnNames[i] = cnames[i];
+
+                if ("jcr:path".equals(cnames[i])) {
+                    jcrPathColumnIndex = i + 1;
+                } else if ("jcr:score".equals(cnames[i])) {
+                    jcrScoreColumnIndex = i + 1;
+                }
+            }
 
             rowIterator = queryResult.getRows();
         } catch (RepositoryException e) {
@@ -214,7 +225,7 @@ class JcrJdbcResultSet implements ResultSet {
         try {
             if ("jcr:name".equals(columnLabel)) {
                 return currentRow.getNode().getName();
-            } else if ("jcr:path".equals(columnLabel)) {
+            } else if ("jcr:path".equals(columnLabel) && jcrPathColumnIndex == 0) {
                 return currentRow.getPath();
             } else if ("jcr:uuid".equals(columnLabel)) {
                 return currentRow.getNode().getIdentifier();
@@ -309,7 +320,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            if ("jcr:score".equals(columnLabel)) {
+            if ("jcr:score".equals(columnLabel) && jcrScoreColumnIndex == 0) {
                 return currentRow.getScore();
             } else {
                 Value value = getColumnValue(currentRow, columnLabel);

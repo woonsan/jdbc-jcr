@@ -61,6 +61,8 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     private Object[] parameters;
 
+    private ParameterMetaData parameterMetaData;
+
     public JcrJdbcPreparedStatement(final JcrJdbcConnection connection, final String queryStatement)
             throws SQLException {
         super(connection);
@@ -73,6 +75,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
                     jcrQueryBuilder);
 
             parameters = new Object[parametersCount];
+            parameterMetaData = new JcrJdbcParameterMetaData(parameters);
 
             jcrQueryStatement = jcrQueryBuilder.toString();
             queryLanguage = SQLQueryUtils.detectQueryLanguage(jcrQueryStatement);
@@ -159,6 +162,14 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     @Override
     public int executeUpdate() throws SQLException {
         throw new UnsupportedOperationException();
+    }
+
+    public Object getParameter(int parameterIndex) throws SQLException {
+        if (parameterIndex <= 0 || parameterIndex > parametersCount) {
+            throw new SQLException("Invalid parameter index.");
+        }
+
+        return parameters[parameterIndex - 1];
     }
 
     @Override
@@ -336,7 +347,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     @Override
     public ParameterMetaData getParameterMetaData() throws SQLException {
-        throw new UnsupportedOperationException();
+        return parameterMetaData;
     }
 
     @Override

@@ -20,11 +20,13 @@ package com.github.woonsan.jdbc.jcr.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
@@ -32,7 +34,11 @@ import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import org.junit.Test;
 
@@ -168,8 +174,124 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
 
     @SuppressWarnings("deprecation")
     @Test
+    public void testSetParameters() throws Exception {
+        PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
+
+        assertNotNull(((JcrJdbcPreparedStatement) pstmt).getValueFactory());
+
+        assertEquals(1, pstmt.getParameterMetaData().getParameterCount());
+
+        pstmt.setString(1, "Hello, World!");
+        assertEquals("Hello, World!", ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.clearParameters();
+
+        try {
+            pstmt.setNull(1, Types.NVARCHAR);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.setNull(1, Types.NVARCHAR, null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        pstmt.setBoolean(1, true);
+        assertEquals(Boolean.TRUE, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setByte(1, (byte) 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setShort(1, (short) 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setInt(1, 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setLong(1, (long) 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setFloat(1, (float) 1.1);
+
+        pstmt.setDouble(1, 1.1);
+        assertEquals(1.1, (double) ((JcrJdbcPreparedStatement) pstmt).getParameter(1), 0.001);
+
+        pstmt.setBigDecimal(1, new BigDecimal("3.14E10"));
+        assertEquals(new BigDecimal("3.14E10"), ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        try {
+            pstmt.setBytes(1, "Hello, World!".getBytes());
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        long curTimeMillis = System.currentTimeMillis();
+
+        pstmt.setDate(1, new Date(curTimeMillis));
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTime(1, new Time(curTimeMillis));
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTimestamp(1, new Timestamp(curTimeMillis));
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        try {
+            pstmt.setAsciiStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setAsciiStream(1, null, (int) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setAsciiStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setUnicodeStream(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null, (int) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        curTimeMillis = System.currentTimeMillis();
+        Calendar curCal = Calendar.getInstance();
+
+        pstmt.setDate(1, new Date(curTimeMillis), curCal);
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTime(1, new Time(curTimeMillis), curCal);
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTimestamp(1, new Timestamp(curTimeMillis), curCal);
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
     public void testUnsupportedOperations() throws Exception {
         PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
+
+        try {
+            pstmt.setNull(1, Types.NUMERIC);
+        } catch (UnsupportedOperationException ignore) {}
 
         try {
             pstmt.executeUpdate();
@@ -235,11 +357,6 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
             pstmt.setURL(1, null);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
-
-        try {
-            pstmt.getParameterMetaData();
-            fail();
-        } catch (UnsupportedOperationException ignore) {}
 
         try {
             pstmt.setRowId(1, null);

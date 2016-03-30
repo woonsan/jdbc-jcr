@@ -26,6 +26,7 @@ import static org.junit.Assert.fail;
 
 import java.sql.Date;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 
@@ -125,6 +126,158 @@ public class JcrJdbcStatementTest extends AbstractRepositoryEnabledTestCase {
 
         statement.close();
         assertTrue(statement.isClosed());
+    }
+
+    @Test
+    public void testStatementWhenClosed() throws Exception {
+        Statement statement = getConnection().createStatement();
+        statement.close();
+
+        try {
+            statement.executeQuery(null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getMaxFieldSize();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setMaxFieldSize(-1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setMaxFieldSize(100);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getMaxRows();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setMaxRows(-1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setMaxRows(100);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            ((JcrJdbcStatement) statement).isEscapeProcessing();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setEscapeProcessing(true);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getQueryTimeout();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setQueryTimeout(-1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setQueryTimeout(30);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getResultSet();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getUpdateCount();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getMoreResults();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setFetchDirection(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getFetchDirection();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setFetchSize(-1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setFetchSize(100);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getFetchSize();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getResultSetConcurrency();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getResultSetType();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getConnection();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getMoreResults(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.getResultSetHoldability();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.setPoolable(true);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.isPoolable();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.closeOnCompletion();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            statement.isCloseOnCompletion();
+            fail();
+        } catch (SQLException ignore) {}
+
     }
 
     @Test

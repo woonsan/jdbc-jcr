@@ -53,12 +53,29 @@ public class BinaryUtilsTest {
     public void testCreateBinaryInputStream() throws Exception {
         InputStream is = BinaryUtils.createBinaryInputStream(binary);
         assertTrue(is.available() >= 0);
-        assertTrue((byte) 'h' == (byte) is.read());
+        assertEquals("h", new Character((char) is.read()).toString());
+
+        if (is.markSupported()) {
+            is.mark(100);
+        }
+
         byte [] bytes = new byte[2];
         is.read(bytes);
-        assertTrue((byte) 'e' == bytes[0] && (byte) 'l' == bytes[1]);
+        assertEquals("e", new Character((char) bytes[0]).toString());
+        assertEquals("l", new Character((char) bytes[1]).toString());
         is.read(bytes, 0, 2);
-        assertTrue((byte) 'l' == bytes[0] && (byte) 'o' == bytes[1]);
+        assertEquals("l", new Character((char) bytes[0]).toString());
+        assertEquals("o", new Character((char) bytes[1]).toString());
+
+        if (is.markSupported()) {
+            is.reset();
+            is.skip(2);
+            is.read(bytes);
+            assertEquals("l", new Character((char) bytes[0]).toString());
+            assertEquals("o", new Character((char) bytes[1]).toString());
+        }
+
         is.close();
     }
+
 }

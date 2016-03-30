@@ -38,6 +38,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Map;
 
 import org.junit.Test;
@@ -438,6 +439,31 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             fail();
         } catch (SQLException ignore) {}
 
+        try {
+            rs.setFetchDirection(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getFetchDirection();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.setFetchSize(100);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getFetchSize();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getHoldability();
+            fail();
+        } catch (SQLException ignore) {}
+
         statement.close();
     }
 
@@ -518,6 +544,11 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
         try {
             rs.previous();
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.moveToCurrentRow();
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1155,6 +1186,7 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             hireDate2 = rs.getDate("hiredate");
             assertEquals(hireDate, hireDate2);
 
+            assertWrongValueFormatColumn(rs);
             assertNonExistingColumn(rs);
 
             System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
@@ -1176,6 +1208,204 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         System.out.println();
 
         return count;
+    }
+
+    private void assertWrongValueFormatColumn(final ResultSet rs) throws Exception {
+        assertFalse(rs.getBoolean(2));
+        assertFalse(rs.getBoolean("ename"));
+
+        try {
+            rs.getShort(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getShort("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getInt(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getInt("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getLong(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getLong("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getFloat(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getFloat("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getDouble(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getDouble("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getBigDecimal(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getBigDecimal("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getBytes(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getBytes("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getDate(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getDate("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getDate(2, Calendar.getInstance());
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getDate("ename", Calendar.getInstance());
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTime(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTime("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTime(2, Calendar.getInstance());
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTime("ename", Calendar.getInstance());
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTimestamp(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTimestamp("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTimestamp(2, Calendar.getInstance());
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getTimestamp("ename", Calendar.getInstance());
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getAsciiStream(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getAsciiStream("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getBinaryStream(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getBinaryStream("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getCharacterStream(2);
+            fail();
+        } catch (SQLException ignore) {
+        }
+
+        try {
+            rs.getCharacterStream("ename");
+            fail();
+        } catch (SQLException ignore) {
+        }
+
     }
 
     @SuppressWarnings("deprecation")

@@ -86,6 +86,29 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
     }
 
     @Test
+    public void testResultSetOptions() throws Exception {
+        Statement statement = getConnection().createStatement();
+        ResultSet rs = statement.executeQuery(SQL_EMPS);
+
+        assertEquals(ResultSet.FETCH_FORWARD, rs.getFetchDirection());
+        rs.setFetchDirection(ResultSet.FETCH_FORWARD);
+        assertEquals(ResultSet.FETCH_FORWARD, rs.getFetchDirection());
+
+        try {
+            rs.setFetchDirection(ResultSet.FETCH_REVERSE);
+            fail();
+        } catch (SQLException ignore) {}
+
+        assertEquals(ResultSet.FETCH_FORWARD, rs.getFetchDirection());
+
+        rs.setFetchSize(100);
+        assertEquals(100, rs.getFetchSize());
+
+        rs.close();
+        statement.close();
+    }
+
+    @Test
     public void testGetMetaData() throws Exception {
         Statement statement = getConnection().createStatement();
         ResultSet rs = statement.executeQuery(SQL_EMPS);
@@ -114,6 +137,307 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         }
 
         rs.close();
+        statement.close();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testResultSetWhenClosed() throws Exception {
+        Statement statement = getConnection().createStatement();
+        ResultSet rs = statement.executeQuery(SQL_EMPS);
+
+        rs.close();
+
+        try {
+            rs.isBeforeFirst();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.isAfterLast();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.isFirst();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.isLast();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.beforeFirst();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.afterLast();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.first();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.last();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.next();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getRow();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getType();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getConcurrency();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.rowUpdated();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.rowDeleted();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.rowInserted();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getStatement();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.wasNull();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getString(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getString("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBoolean(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBoolean("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getByte(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getByte("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getShort(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getShort("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getInt(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getInt("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getLong(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getLong("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getFloat(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getFloat("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDouble(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDouble("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBigDecimal(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBigDecimal("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBytes(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBytes("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate(1, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getDate("col1", null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime(1, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTime("col1", null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp(1, null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getTimestamp("col1", null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getAsciiStream(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getAsciiStream("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getUnicodeStream(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getUnicodeStream("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBinaryStream(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getBinaryStream("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getCharacterStream(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getCharacterStream("col1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            rs.getMetaData();
+            fail();
+        } catch (SQLException ignore) {}
+
         statement.close();
     }
 

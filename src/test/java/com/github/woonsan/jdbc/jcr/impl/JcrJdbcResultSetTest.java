@@ -43,6 +43,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.github.woonsan.jdbc.jcr.Constants;
+
 public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
     private static final String SQL_EMPS =
@@ -116,7 +118,7 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         ResultSetMetaData metaData = rs.getMetaData();
 
         // When 'sql' query used, jcr adds 'jcr:path' and 'jcr:score' columns automatically.
-        assertEquals(4 + 2, metaData.getColumnCount());
+        assertEquals(4 + Constants.META_COLUMNS.size(), metaData.getColumnCount());
 
         assertEquals("empno", metaData.getColumnName(1));
         assertEquals("ename", metaData.getColumnName(2));
@@ -1185,6 +1187,13 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             hireDate = rs.getDate(4);
             hireDate2 = rs.getDate("hiredate");
             assertEquals(hireDate, hireDate2);
+
+            String nodeName = rs.getString(Constants.COLUMN_JCR_NAME);
+            assertEquals("testdata-" + count, nodeName);
+            assertEquals("/testdatafolder/" + nodeName, rs.getString(Constants.COLUMN_JCR_PATH));
+            String nodeId = rs.getString(Constants.COLUMN_JCR_UUID);
+            assertTrue(nodeId != null && !nodeId.isEmpty());
+            assertTrue(rs.getDouble(Constants.COLUMN_JCR_SCORE) > 0.0);
 
             assertWrongValueFormatColumn(rs);
             assertNonExistingColumn(rs);

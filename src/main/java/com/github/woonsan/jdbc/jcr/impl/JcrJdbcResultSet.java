@@ -41,7 +41,10 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.jcr.Binary;
@@ -52,12 +55,13 @@ import javax.jcr.query.QueryResult;
 import javax.jcr.query.Row;
 import javax.jcr.query.RowIterator;
 
+import com.github.woonsan.jdbc.jcr.Constants;
+
 class JcrJdbcResultSet implements ResultSet {
 
     private Statement statement;
     private final String [] columnNames;
-    private int jcrPathColumnIndex;
-    private int jcrScoreColumnIndex;
+    private final Map<String, Integer> metaColumnIndexMap;
     private ResultSetMetaData resultSetMetaData;
     private RowIterator rowIterator;
     private Row currentRow;
@@ -76,17 +80,27 @@ class JcrJdbcResultSet implements ResultSet {
 
         try {
             String [] cnames = queryResult.getColumnNames();
-            columnNames = new String[cnames.length];
+            List<String> cnameList = new ArrayList<>();
+            metaColumnIndexMap = new HashMap<>();
 
             for (int i = 0; i < cnames.length; i++) {
-                columnNames[i] = cnames[i];
+                cnameList.add(cnames[i]);
 
-                if ("jcr:path".equals(cnames[i])) {
-                    jcrPathColumnIndex = i + 1;
-                } else if ("jcr:score".equals(cnames[i])) {
-                    jcrScoreColumnIndex = i + 1;
+                // when 'sql' query language used, jcr:path and jcr:score columns are available.
+                if (Constants.COLUMN_JCR_PATH.equals(cnames[i])) {
+                    metaColumnIndexMap.put(Constants.COLUMN_JCR_PATH, i + 1);
+                } else if (Constants.COLUMN_JCR_SCORE.equals(cnames[i])) {
+                    metaColumnIndexMap.put(Constants.COLUMN_JCR_SCORE, i + 1);
                 }
             }
+
+            for (String metaCol : Constants.META_COLUMNS) {
+                if (!cnameList.contains(metaCol)) {
+                    cnameList.add(metaCol);
+                }
+            }
+
+            columnNames = cnameList.toArray(new String[cnameList.size()]);
 
             rowIterator = queryResult.getRows();
         } catch (RepositoryException e) {
@@ -223,11 +237,11 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            if ("jcr:name".equals(columnLabel)) {
+            if (Constants.COLUMN_JCR_NAME.equals(columnLabel)) {
                 return currentRow.getNode().getName();
-            } else if ("jcr:path".equals(columnLabel) && jcrPathColumnIndex == 0) {
+            } else if (Constants.COLUMN_JCR_PATH.equals(columnLabel) && !metaColumnIndexMap.containsKey(Constants.COLUMN_JCR_PATH)) {
                 return currentRow.getPath();
-            } else if ("jcr:uuid".equals(columnLabel)) {
+            } else if (Constants.COLUMN_JCR_UUID.equals(columnLabel)) {
                 return currentRow.getNode().getIdentifier();
             } else {
                 Value value = getColumnValue(currentRow, columnLabel);
@@ -320,7 +334,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            if ("jcr:score".equals(columnLabel) && jcrScoreColumnIndex == 0) {
+            if (Constants.COLUMN_JCR_SCORE.equals(columnLabel) && !metaColumnIndexMap.containsKey(Constants.COLUMN_JCR_SCORE)) {
                 return currentRow.getScore();
             } else {
                 Value value = getColumnValue(currentRow, columnLabel);

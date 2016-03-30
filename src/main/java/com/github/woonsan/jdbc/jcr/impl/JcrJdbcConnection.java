@@ -71,7 +71,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public Statement createStatement() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         return new JcrJdbcStatement(this);
@@ -80,7 +80,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         return new JcrJdbcPreparedStatement(this, sql);
@@ -94,7 +94,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public String nativeSQL(String sql) throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         return sql;
@@ -103,7 +103,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         this.autoCommit = autoCommit;
@@ -112,7 +112,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public boolean getAutoCommit() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         return autoCommit;
@@ -121,7 +121,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public void commit() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         try {
@@ -134,7 +134,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public void rollback() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         try {
@@ -170,7 +170,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public void setReadOnly(boolean readOnly) throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         if (!readOnly) {
@@ -183,7 +183,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public boolean isReadOnly() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         return readOnly;
@@ -202,7 +202,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public void setTransactionIsolation(int transactionIsolationLevel) throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         this.transactionIsolationLevel = transactionIsolationLevel;
@@ -211,7 +211,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public int getTransactionIsolation() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         return transactionIsolationLevel;
@@ -256,7 +256,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public void setHoldability(int holdability) throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         this.holdability = holdability;
@@ -265,7 +265,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public int getHoldability() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         return holdability;
@@ -353,7 +353,7 @@ public class JcrJdbcConnection implements Connection {
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
         try {
             if (isClosed()) {
-                throw new IllegalStateException("JCR session was already closed.");
+                throw new SQLException("JCR session was already closed.");
             }
         } catch (SQLException e) {
             throw new IllegalStateException("JCR session was already closed.");
@@ -370,7 +370,7 @@ public class JcrJdbcConnection implements Connection {
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         try {
             if (isClosed()) {
-                throw new IllegalStateException("JCR session was already closed.");
+                throw new SQLException("JCR session was already closed.");
             }
         } catch (SQLException e) {
             throw new IllegalStateException("JCR session was already closed.");

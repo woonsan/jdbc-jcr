@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -84,6 +85,113 @@ public class JcrJdbcConnectionTest extends AbstractRepositoryEnabledTestCase {
         assertFalse(conn.isClosed());
         conn.close();
         assertTrue(conn.isClosed());
+    }
+
+    @Test
+    public void testConnectionWhenClosed() throws Exception {
+        Connection conn = getConnection();
+        conn.close();
+
+        try {
+            conn.createStatement();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.createStatement(1, 1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.createStatement(1, 1, 1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.prepareStatement(null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.prepareStatement(null, 1, 1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.prepareStatement(null, 1, 1, 1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.prepareStatement(null, 1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.prepareStatement(null, (int[]) null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.prepareStatement(null, (String[]) null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.nativeSQL(null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.setAutoCommit(true);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.getAutoCommit();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.commit();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.rollback();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.setReadOnly(true);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.isReadOnly();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.setTransactionIsolation(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.getTransactionIsolation();
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.setHoldability(1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.getHoldability();
+            fail();
+        } catch (SQLException ignore) {}
+
     }
 
     @Test

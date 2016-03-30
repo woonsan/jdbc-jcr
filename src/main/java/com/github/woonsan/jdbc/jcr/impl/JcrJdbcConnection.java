@@ -353,10 +353,10 @@ public class JcrJdbcConnection implements Connection {
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
         try {
             if (isClosed()) {
-                throw new SQLException("JCR session was already closed.");
+                throw new SQLClientInfoException("JCR session was already closed.", null);
             }
         } catch (SQLException e) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLClientInfoException(e.getMessage(), null);
         }
 
         if (clientInfos == null) {
@@ -370,10 +370,10 @@ public class JcrJdbcConnection implements Connection {
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         try {
             if (isClosed()) {
-                throw new SQLException("JCR session was already closed.");
+                throw new SQLClientInfoException("JCR session was already closed.", null);
             }
         } catch (SQLException e) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLClientInfoException(e.getMessage(), null);
         }
 
         if (clientInfos == null) {
@@ -386,7 +386,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public String getClientInfo(String name) throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         String value = null;
@@ -401,7 +401,7 @@ public class JcrJdbcConnection implements Connection {
     @Override
     public Properties getClientInfo() throws SQLException {
         if (isClosed()) {
-            throw new IllegalStateException("JCR session was already closed.");
+            throw new SQLException("JCR session was already closed.");
         }
 
         if (clientInfos == null) {

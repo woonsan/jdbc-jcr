@@ -449,7 +449,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
         return valueFactory;
     }
 
-    private Value toJcrValue(final Object value) {
+    Value toJcrValue(final Object value) {
         Value jcrValue = null;
 
         if (value instanceof String) {

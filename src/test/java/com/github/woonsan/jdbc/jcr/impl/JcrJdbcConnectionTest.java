@@ -192,6 +192,26 @@ public class JcrJdbcConnectionTest extends AbstractRepositoryEnabledTestCase {
             fail();
         } catch (SQLException ignore) {}
 
+        try {
+            conn.setClientInfo("var1", "value1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.getClientInfo("var1");
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.setClientInfo(null);
+            fail();
+        } catch (SQLException ignore) {}
+
+        try {
+            conn.getClientInfo();
+            fail();
+        } catch (SQLException ignore) {}
+
     }
 
     @Test

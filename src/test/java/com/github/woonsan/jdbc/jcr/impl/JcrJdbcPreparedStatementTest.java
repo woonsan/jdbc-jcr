@@ -33,12 +33,16 @@ import java.sql.Date;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import javax.jcr.PropertyType;
+import javax.jcr.Value;
 
 import org.junit.Test;
 
@@ -184,6 +188,11 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         pstmt.setString(1, "Hello, World!");
         assertEquals("Hello, World!", ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
 
+        try {
+            ((JcrJdbcPreparedStatement) pstmt).getParameter(-1);
+            fail();
+        } catch (SQLException ignore) {}
+
         pstmt.clearParameters();
 
         try {
@@ -282,6 +291,36 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         pstmt.setTimestamp(1, new Timestamp(curTimeMillis), curCal);
         assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
 
+    }
+
+    @Test
+    public void testToJcrValue() throws Exception {
+        PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
+
+        Value value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue("Hello");
+        assertEquals(PropertyType.STRING, value.getType());
+        assertEquals("Hello", value.getString());
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(Long.valueOf(1));
+        assertEquals(PropertyType.LONG, value.getType());
+        assertEquals(1, value.getLong());
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(Double.valueOf(1.0));
+        assertEquals(PropertyType.DOUBLE, value.getType());
+        assertEquals(1.0, value.getDouble(), 0.001);
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(new BigDecimal(123456789.0));
+        assertEquals(PropertyType.DECIMAL, value.getType());
+        assertEquals(new BigDecimal(123456789.0), value.getDecimal());
+
+        Calendar now = Calendar.getInstance();
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(now);
+        assertEquals(PropertyType.DATE, value.getType());
+        assertEquals(now.getTimeInMillis(), value.getDate().getTimeInMillis());
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(Boolean.TRUE);
+        assertEquals(PropertyType.BOOLEAN, value.getType());
+        assertEquals(Boolean.TRUE, value.getBoolean());
     }
 
     @SuppressWarnings("deprecation")

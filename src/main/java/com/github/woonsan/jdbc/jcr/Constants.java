@@ -18,11 +18,26 @@
  */
 package com.github.woonsan.jdbc.jcr;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class Constants {
 
     public static final int MAJOR_VERSION = 0;
 
     public static final int MINOR_VERSION = 1;
+
+    public static final String COLUMN_JCR_PATH = "jcr:path";
+
+    public static final String COLUMN_JCR_NAME = "jcr:name";
+
+    public static final String COLUMN_JCR_UUID = "jcr:uuid";
+
+    public static final String COLUMN_JCR_SCORE = "jcr:score";
+
+    public static final List<String> META_COLUMNS = Collections
+            .unmodifiableList(Arrays.asList(COLUMN_JCR_PATH, COLUMN_JCR_NAME, COLUMN_JCR_UUID, COLUMN_JCR_SCORE));
 
     private Constants() {
     }

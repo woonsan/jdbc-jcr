@@ -149,6 +149,14 @@ class JcrJdbcStatement implements Statement {
         this.maxRows = maxRows;
     }
 
+    public boolean isEscapeProcessing() throws SQLException {
+        if (isClosed()) {
+            throw new SQLException("Statement was already closed.");
+        }
+
+        return escapeProcessing;
+    }
+
     @Override
     public void setEscapeProcessing(boolean escapeProcessing) throws SQLException {
         if (isClosed()) {

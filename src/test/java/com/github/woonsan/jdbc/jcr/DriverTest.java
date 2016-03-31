@@ -21,13 +21,18 @@ package com.github.woonsan.jdbc.jcr;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+
+import javax.jcr.LoginException;
+import javax.jcr.NoSuchWorkspaceException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,11 +82,147 @@ public class DriverTest {
     }
 
     @Test
-    public void testConnectByInfo() throws Exception {
+    public void testReadConnectionProperties() throws Exception {
+        Properties info = new Properties();
+
+        String url = "jdbc:jcr:";
+        Properties props = ((Driver) jdbcDriver).readConnectionProperties(url, info);
+        assertEquals("", props.get(Driver.CONNECTION_PROP_LOCATION));
+        assertNull(props.get(Driver.REPO_CONF_PROPERTY));
+        assertNull(props.get(Driver.REPO_HOME_PROPERTY));
+
+        url = "jdbc:jcr:?repository.conf=repository2.xml&repository.home=repository2";
+        props = ((Driver) jdbcDriver).readConnectionProperties(url, info);
+        assertEquals("", props.get(Driver.CONNECTION_PROP_LOCATION));
+        assertEquals("repository2.xml", props.get(Driver.REPO_CONF_PROPERTY));
+        assertEquals("repository2", props.get(Driver.REPO_HOME_PROPERTY));
+
+        url = "jdbc:jcr:;repository.conf=repository2.xml;repository.home=repository2";
+        props = ((Driver) jdbcDriver).readConnectionProperties(url, info);
+        assertEquals("", props.get(Driver.CONNECTION_PROP_LOCATION));
+        assertEquals("repository2.xml", props.get(Driver.REPO_CONF_PROPERTY));
+        assertEquals("repository2", props.get(Driver.REPO_HOME_PROPERTY));
+    }
+
+    @Test
+    public void testReadNullConnectionProperties() throws Exception {
+        try {
+            ((Driver) jdbcDriver).readConnectionProperties(null, null);
+            fail();
+        } catch (SQLException ignore) {
+        }
+    }
+
+    @Test
+    public void testConnectToEmptyTransientURL() throws Exception {
+        final String url = "jdbc:jcr:";
+        Properties info = new Properties();
+
+        try {
+            Connection conn = jdbcDriver.connect(url, info);
+            fail();
+        } catch (SQLException ignore) {
+        }
+    }
+
+    @Test
+    public void testConnectToNonExistingURL() throws Exception {
+        final String url = "jdbc:jcr:http://non.existing.example.com:8080/server/";
+        Properties info = new Properties();
+
+        try {
+            Connection conn = jdbcDriver.connect(url, info);
+            fail();
+        } catch (SQLException ignore) {
+        }
+    }
+
+    @Test
+    public void testConnectByInfo_WithUsername() throws Exception {
         Properties info = new Properties();
         info.setProperty("username", "admin");
         info.setProperty("password", "admin");
 
+        Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
+        assertFalse(conn.isClosed());
+        assertTrue(conn.isReadOnly());
+
+        conn.close();
+        assertTrue(conn.isClosed());
+    }
+
+    @Test
+    public void testConnectByInfo_WithUsernameAndDefaultWorkspace() throws Exception {
+        Properties info = new Properties();
+        info.setProperty("username", "admin");
+        info.setProperty("password", "admin");
+        info.setProperty("workspace", "default");
+
+        Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
+        assertFalse(conn.isClosed());
+        assertTrue(conn.isReadOnly());
+
+        conn.close();
+        assertTrue(conn.isClosed());
+    }
+
+    @Test
+    public void testConnectByInfo_WithUsernameAndNonExistingWorkspace() throws Exception {
+        Properties info = new Properties();
+        info.setProperty("username", "admin");
+        info.setProperty("password", "admin");
+        info.setProperty("workspace", "nonexisting");
+
+        try {
+            Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
+            fail();
+        } catch (SQLException e) {
+            assertEquals(NoSuchWorkspaceException.class, e.getCause().getClass());
+        }
+    }
+
+    @Test
+    public void testConnectByInfo_WithUser() throws Exception {
+        Properties info = new Properties();
+        info.setProperty("user", "admin");
+        info.setProperty("password", "admin");
+
+        Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
+        assertFalse(conn.isClosed());
+        assertTrue(conn.isReadOnly());
+
+        conn.close();
+        assertTrue(conn.isClosed());
+    }
+
+    @Test
+    public void testConnectByInfo_WithoutPassword() throws Exception {
+        Properties info = new Properties();
+        info.setProperty("username", "admin");
+
+        try {
+            Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
+            fail();
+        } catch (SQLException e) {
+            assertEquals(LoginException.class, e.getCause().getClass());
+        }
+    }
+
+    @Test
+    public void testConnectByInfo_WithNoCredsNoWorkspace() throws Exception {
+        Properties info = new Properties();
+        Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
+        assertFalse(conn.isClosed());
+        assertTrue(conn.isReadOnly());
+
+        conn.close();
+        assertTrue(conn.isClosed());
+    }
+
+    @Test
+    public void testConnectByInfo_WithNoCredsAndWithDefaultWorkspace() throws Exception {
+        Properties info = new Properties();
+        info.setProperty("workspace", "default");
         Connection conn = jdbcDriver.connect(TestConstants.DEFAULT_TEST_JDBC_URL, info);
         assertFalse(conn.isClosed());
         assertTrue(conn.isReadOnly());

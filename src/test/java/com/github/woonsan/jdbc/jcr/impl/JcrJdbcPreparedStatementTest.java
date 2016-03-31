@@ -20,12 +20,29 @@ package com.github.woonsan.jdbc.jcr.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+import javax.jcr.PropertyType;
+import javax.jcr.Value;
 
 import org.junit.Test;
 
@@ -81,6 +98,9 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         assertTrue(rs.isAfterLast());
         rs.close();
         assertTrue(rs.isClosed());
+
+        pstmt.close();
+        assertTrue(pstmt.isClosed());
     }
 
     @Test
@@ -103,6 +123,9 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         assertTrue(rs.isAfterLast());
         rs.close();
         assertTrue(rs.isClosed());
+
+        pstmt.close();
+        assertTrue(pstmt.isClosed());
     }
 
     @Test
@@ -124,6 +147,9 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         assertTrue(rs.isAfterLast());
         rs.close();
         assertTrue(rs.isClosed());
+
+        pstmt.close();
+        assertTrue(pstmt.isClosed());
     }
 
     @Test
@@ -145,6 +171,333 @@ public class JcrJdbcPreparedStatementTest extends AbstractRepositoryEnabledTestC
         assertTrue(rs.isAfterLast());
         rs.close();
         assertTrue(rs.isClosed());
+
+        pstmt.close();
+        assertTrue(pstmt.isClosed());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testSetParameters() throws Exception {
+        PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
+
+        assertNotNull(((JcrJdbcPreparedStatement) pstmt).getValueFactory());
+
+        assertEquals(1, pstmt.getParameterMetaData().getParameterCount());
+
+        pstmt.setString(1, "Hello, World!");
+        assertEquals("Hello, World!", ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        try {
+            ((JcrJdbcPreparedStatement) pstmt).getParameter(-1);
+            fail();
+        } catch (SQLException ignore) {}
+
+        pstmt.clearParameters();
+
+        try {
+            pstmt.setNull(1, Types.NVARCHAR);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.setNull(1, Types.NVARCHAR, null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        pstmt.setBoolean(1, true);
+        assertEquals(Boolean.TRUE, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setByte(1, (byte) 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setShort(1, (short) 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setInt(1, 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setLong(1, (long) 1);
+        assertEquals((long) 1, ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        pstmt.setFloat(1, (float) 1.1);
+
+        pstmt.setDouble(1, 1.1);
+        assertEquals(1.1, (double) ((JcrJdbcPreparedStatement) pstmt).getParameter(1), 0.001);
+
+        pstmt.setBigDecimal(1, new BigDecimal("3.14E10"));
+        assertEquals(new BigDecimal("3.14E10"), ((JcrJdbcPreparedStatement) pstmt).getParameter(1));
+
+        try {
+            pstmt.setBytes(1, "Hello, World!".getBytes());
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        long curTimeMillis = System.currentTimeMillis();
+
+        pstmt.setDate(1, new Date(curTimeMillis));
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTime(1, new Time(curTimeMillis));
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTimestamp(1, new Timestamp(curTimeMillis));
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        try {
+            pstmt.setAsciiStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setAsciiStream(1, null, (int) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setAsciiStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setUnicodeStream(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null, (int) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        curTimeMillis = System.currentTimeMillis();
+        Calendar curCal = Calendar.getInstance();
+
+        pstmt.setDate(1, new Date(curTimeMillis), curCal);
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTime(1, new Time(curTimeMillis), curCal);
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+        pstmt.setTimestamp(1, new Timestamp(curTimeMillis), curCal);
+        assertEquals(curTimeMillis, ((Calendar) ((JcrJdbcPreparedStatement) pstmt).getParameter(1)).getTimeInMillis());
+
+    }
+
+    @Test
+    public void testToJcrValue() throws Exception {
+        PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
+
+        Value value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue("Hello");
+        assertEquals(PropertyType.STRING, value.getType());
+        assertEquals("Hello", value.getString());
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(Long.valueOf(1));
+        assertEquals(PropertyType.LONG, value.getType());
+        assertEquals(1, value.getLong());
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(Double.valueOf(1.0));
+        assertEquals(PropertyType.DOUBLE, value.getType());
+        assertEquals(1.0, value.getDouble(), 0.001);
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(new BigDecimal(123456789.0));
+        assertEquals(PropertyType.DECIMAL, value.getType());
+        assertEquals(new BigDecimal(123456789.0), value.getDecimal());
+
+        Calendar now = Calendar.getInstance();
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(now);
+        assertEquals(PropertyType.DATE, value.getType());
+        assertEquals(now.getTimeInMillis(), value.getDate().getTimeInMillis());
+
+        value = ((JcrJdbcPreparedStatement) pstmt).toJcrValue(Boolean.TRUE);
+        assertEquals(PropertyType.BOOLEAN, value.getType());
+        assertEquals(Boolean.TRUE, value.getBoolean());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testUnsupportedOperations() throws Exception {
+        PreparedStatement pstmt = getConnection().prepareStatement(SQL_EMPS_ENAME);
+
+        try {
+            pstmt.setNull(1, Types.NUMERIC);
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.executeUpdate();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.execute();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.setBytes(1, null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.setUnicodeStream(1, null, 1);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setObject(1, null, 1);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.setObject(1, null);
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.addBatch();
+            fail();
+        } catch (UnsupportedOperationException ignore) {}
+
+        try {
+            pstmt.setRef(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBlob(1, (Blob) null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setClob(1, (Clob) null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setArray(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.getMetaData();
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setURL(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setRowId(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setNString(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setNCharacterStream(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setNClob(1, (NClob) null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setClob(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setClob(1, (Reader) null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBlob(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBlob(1, (InputStream) null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setNClob(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setNClob(1, (Reader) null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setSQLXML(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setObject(1, null, 1, 1);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setAsciiStream(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setAsciiStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setBinaryStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setCharacterStream(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setCharacterStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setNCharacterStream(1, null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            pstmt.setNCharacterStream(1, null);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        pstmt.close();
     }
 
     private int printResultSet(final ResultSet rs, final int offset) throws Exception {

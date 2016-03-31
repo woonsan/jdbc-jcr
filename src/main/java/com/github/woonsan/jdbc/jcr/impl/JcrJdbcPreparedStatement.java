@@ -61,6 +61,8 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     private Object[] parameters;
 
+    private ParameterMetaData parameterMetaData;
+
     public JcrJdbcPreparedStatement(final JcrJdbcConnection connection, final String queryStatement)
             throws SQLException {
         super(connection);
@@ -72,9 +74,8 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
             parametersCount = SQLQueryUtils.convertParameterBindingSqlToVariableBindingQuery(queryStatement,
                     jcrQueryBuilder);
 
-            if (parametersCount > 0) {
-                parameters = new Object[parametersCount];
-            }
+            parameters = new Object[parametersCount];
+            parameterMetaData = new JcrJdbcParameterMetaData(parameters);
 
             jcrQueryStatement = jcrQueryBuilder.toString();
             queryLanguage = SQLQueryUtils.detectQueryLanguage(jcrQueryStatement);
@@ -161,6 +162,14 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
     @Override
     public int executeUpdate() throws SQLException {
         throw new UnsupportedOperationException();
+    }
+
+    public Object getParameter(int parameterIndex) throws SQLException {
+        if (parameterIndex <= 0 || parameterIndex > parametersCount) {
+            throw new SQLException("Invalid parameter index.");
+        }
+
+        return parameters[parameterIndex - 1];
     }
 
     @Override
@@ -250,7 +259,9 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     @Override
     public void clearParameters() throws SQLException {
-        throw new UnsupportedOperationException();
+        for (int i = 0; i < parametersCount; i++) {
+            parameters[i] = null;
+        }
     }
 
     @Override
@@ -336,7 +347,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
 
     @Override
     public ParameterMetaData getParameterMetaData() throws SQLException {
-        throw new UnsupportedOperationException();
+        return parameterMetaData;
     }
 
     @Override
@@ -438,7 +449,7 @@ class JcrJdbcPreparedStatement extends JcrJdbcStatement implements PreparedState
         return valueFactory;
     }
 
-    private Value toJcrValue(final Object value) {
+    Value toJcrValue(final Object value) {
         Value jcrValue = null;
 
         if (value instanceof String) {

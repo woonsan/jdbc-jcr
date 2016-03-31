@@ -1,13 +1,20 @@
 jdbc-jcr Changelog
 ====================
 
+## jdbc-jcr 0.1.3
+
+Fixed Issues:
+
+* Unit tests.
+* Supporting meta columns in *ResultSetMetaData*.
+
 ## jdbc-jcr 0.1.2
 
 Fixed Issues:
 
 * Support both **sql** and **JCR2_SQL** query languages with automatic detection from the query statements.
 * More intuitive SQL parameters syntax and setting.
-* Supporting metadata columns: *jcr:name*, *jcr:path*, *jcr:uuid* and *jcr:score*.
+* Supporting meta columns: *jcr:name*, *jcr:path*, *jcr:uuid* and *jcr:score*.
 * Repository caching in Driver.
 
 ## jdbc-jcr 0.1.1

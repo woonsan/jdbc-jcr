@@ -171,7 +171,7 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
 # Meta-columns support
 
 ```ResultSet``` supports four meta-columns: **jcr:path**, **jcr:name**, **jcr:uuid** and **jcr:score**.
-So, you can query those meta-columns like the following example:
+So, you can read the values of the meta-columns like the following example:
 
 ```java
             String path = rs.getString("jcr:path");

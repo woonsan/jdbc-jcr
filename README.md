@@ -9,7 +9,7 @@ JDBC Driver for JCR Repository
 
 # Introduction
 
-**jdbc-jcr** provides a JDBC Driver for JCR Repository using **sql** or **JCR2_SQL** query languages.
+**jdbc-jcr** provides a JDBC Driver for JCR Repository using either **sql** (```javax.jcr.query.Query#SQL```) or **JCR2_SQL** (```javax.jcr.query.Query#JCR2_SQL```) query languages.
 
 # How to Add this module in my Project
 

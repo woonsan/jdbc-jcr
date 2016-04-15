@@ -56,8 +56,9 @@ import javax.jcr.query.Row;
 import javax.jcr.query.RowIterator;
 
 import com.github.woonsan.jdbc.jcr.Constants;
+import com.github.woonsan.jdbc.jcr.JcrResultSet;
 
-class JcrJdbcResultSet implements ResultSet {
+class JcrJdbcResultSet implements JcrResultSet {
 
     private Statement statement;
     private final String [] columnNames;
@@ -109,13 +110,34 @@ class JcrJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException();
+    public Row getCurrentRow() throws SQLException {
+        if (currentRow == null) {
+            throw new SQLException("Current row is not available.");
+        }
+
+        return currentRow;
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException();
+        if (iface == null) {
+            throw new IllegalArgumentException("Interface cannot be null.");
+        }
+
+        return iface.isAssignableFrom(JcrResultSet.class);
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        if (iface == null) {
+            throw new IllegalArgumentException("Interface cannot be null.");
+        }
+
+        if (!isWrapperFor(iface)) {
+            throw new SQLException("Not a wrapper for " + iface.getName());
+        }
+
+        return (T) this;
     }
 
     @Override
@@ -238,13 +260,13 @@ class JcrJdbcResultSet implements ResultSet {
 
         try {
             if (Constants.COLUMN_JCR_NAME.equals(columnLabel)) {
-                return currentRow.getNode().getName();
+                return getCurrentRow().getNode().getName();
             } else if (Constants.COLUMN_JCR_PATH.equals(columnLabel) && !metaColumnIndexMap.containsKey(Constants.COLUMN_JCR_PATH)) {
-                return currentRow.getPath();
+                return getCurrentRow().getPath();
             } else if (Constants.COLUMN_JCR_UUID.equals(columnLabel)) {
-                return currentRow.getNode().getIdentifier();
+                return getCurrentRow().getNode().getIdentifier();
             } else {
-                Value value = getColumnValue(currentRow, columnLabel);
+                Value value = getColumnValue(getCurrentRow(), columnLabel);
                 return value.getString();
             }
         } catch (RepositoryException e) {
@@ -259,7 +281,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return value.getBoolean();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -278,7 +300,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return (short) value.getLong();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -292,7 +314,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return (int) value.getLong();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -306,7 +328,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return value.getLong();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -320,7 +342,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return (float) value.getDouble();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -335,9 +357,9 @@ class JcrJdbcResultSet implements ResultSet {
 
         try {
             if (Constants.COLUMN_JCR_SCORE.equals(columnLabel) && !metaColumnIndexMap.containsKey(Constants.COLUMN_JCR_SCORE)) {
-                return currentRow.getScore();
+                return getCurrentRow().getScore();
             } else {
-                Value value = getColumnValue(currentRow, columnLabel);
+                Value value = getColumnValue(getCurrentRow(), columnLabel);
                 return value.getDouble();
             }
         } catch (RepositoryException e) {
@@ -359,7 +381,7 @@ class JcrJdbcResultSet implements ResultSet {
         byte [] bytes = null;
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
 
             if (value.getType() != PropertyType.BINARY) {
                 throw new SQLException("Not a binary field.");
@@ -389,7 +411,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return new Date(value.getDate().getTimeInMillis());
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -403,7 +425,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return new Time(value.getDate().getTimeInMillis());
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -417,7 +439,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return new Timestamp(value.getDate().getTimeInMillis());
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -443,7 +465,7 @@ class JcrJdbcResultSet implements ResultSet {
         InputStream binaryStream = null;
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
 
             if (value.getType() != PropertyType.BINARY) {
                 throw new SQLException("Not a binary field.");
@@ -535,7 +557,7 @@ class JcrJdbcResultSet implements ResultSet {
         }
 
         try {
-            Value value = getColumnValue(currentRow, columnLabel);
+            Value value = getColumnValue(getCurrentRow(), columnLabel);
             return value.getDecimal();
         } catch (RepositoryException e) {
             throw new SQLException(e.toString(), e);
@@ -1329,7 +1351,7 @@ class JcrJdbcResultSet implements ResultSet {
         return columnNames[columnIndex - 1];
     }
 
-    private Value getColumnValue(final Row row, final String columnName) throws RepositoryException {
-        return currentRow.getValue(columnName);
+    private Value getColumnValue(final Row row, final String columnName) throws SQLException, RepositoryException {
+        return row.getValue(columnName);
     }
 }

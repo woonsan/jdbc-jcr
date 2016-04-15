@@ -30,7 +30,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import javax.jcr.Session;
+
 import org.junit.Test;
+
+import com.github.woonsan.jdbc.jcr.JcrConnection;
 
 public class JcrJdbcConnectionTest extends AbstractRepositoryEnabledTestCase {
 
@@ -219,16 +223,6 @@ public class JcrJdbcConnectionTest extends AbstractRepositoryEnabledTestCase {
         Connection conn = getConnection();
 
         try {
-            conn.isWrapperFor(null);
-            fail();
-        } catch (UnsupportedOperationException ignore) {}
-
-        try {
-            conn.unwrap(null);
-            fail();
-        } catch (UnsupportedOperationException ignore) {}
-
-        try {
             conn.prepareCall(null);
             fail();
         } catch (UnsupportedOperationException ignore) {}
@@ -344,4 +338,36 @@ public class JcrJdbcConnectionTest extends AbstractRepositoryEnabledTestCase {
         } catch (UnsupportedOperationException ignore) {}
 
     }
+
+    @Test
+    public void testWrapper() throws Exception {
+        Connection conn = getConnection();
+
+        assertTrue(conn.isWrapperFor(JcrConnection.class));
+
+        try {
+            conn.isWrapperFor(null);
+            fail();
+        } catch (IllegalArgumentException ignore) { }
+
+        assertFalse(conn.isWrapperFor(Session.class));
+
+        JcrConnection jcrConn = conn.unwrap(JcrConnection.class);
+        Session jcrSession = jcrConn.getSession();
+        assertNotNull(jcrSession);
+        assertTrue(jcrSession.isLive());
+
+        try {
+            conn.unwrap(null);
+            fail();
+        } catch (IllegalArgumentException ignore) { }
+
+        try {
+            conn.unwrap(Session.class);
+            fail();
+        } catch (SQLException ignore) { }
+
+        conn.close();
+    }
+
 }

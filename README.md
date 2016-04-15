@@ -179,3 +179,19 @@ So, you can read the values of the meta-columns like the following example:
             String uuid = rs.getString("jcr:uuid");
             double score = rs.getDouble("jcr:score");
 ```
+
+# How to access JCR ```Session``` from ```Connection```
+
+```java
+            Connection conn = getConnection();
+            JcrConnection jconn = conn.unwrap(JcrConnection.class);
+            Session jcrSession = jconn.getSession();
+```
+
+# How to access JCR ```Node``` from ```ResultSet```
+
+```java
+            ResultSet rs = stmt.executeQuery(sql);
+            JcrResultSet jrs = rs.unwrap(JcrResultSet.class);
+            Node node = jcr.getCurrentNode();
+```

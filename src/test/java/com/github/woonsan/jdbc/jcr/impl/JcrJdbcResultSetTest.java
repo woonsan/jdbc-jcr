@@ -20,6 +20,7 @@ package com.github.woonsan.jdbc.jcr.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -41,9 +42,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Map;
 
+import javax.jcr.Node;
+import javax.jcr.query.QueryResult;
+
 import org.junit.Test;
 
 import com.github.woonsan.jdbc.jcr.Constants;
+import com.github.woonsan.jdbc.jcr.JcrResultSet;
 
 public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
@@ -470,19 +475,49 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
     }
 
     @Test
-    public void testUnsupportedOperations() throws Exception {
+    public void testWrapper() throws Exception {
         Statement statement = getConnection().createStatement();
         ResultSet rs = statement.executeQuery(SQL_EMPS);
+
+        assertTrue(rs.isWrapperFor(JcrResultSet.class));
 
         try {
             rs.isWrapperFor(null);
             fail();
-        } catch (UnsupportedOperationException ignore) {}
+        } catch (IllegalArgumentException ignore) { }
 
-        try {
-            rs.unwrap(null);
-            fail();
-        } catch (UnsupportedOperationException ignore) {}
+        assertFalse(rs.isWrapperFor(QueryResult.class));
+
+        JcrResultSet jrs = rs.unwrap(JcrResultSet.class);
+        assertNotNull(jrs);
+
+        int count = 0;
+
+        while (jrs.next()) {
+            ++count;
+
+            Node node = jrs.getCurrentRow().getNode();
+
+            String nodeName = node.getName();
+            String nodePath = node.getPath();
+            String nodeId = node.getIdentifier();
+            double score = jrs.getCurrentRow().getScore();
+
+            assertEquals("testdata-" + count, nodeName);
+            assertEquals("/testdatafolder/" + nodeName, nodePath);
+            assertTrue(nodeId != null && !nodeId.isEmpty());
+            assertTrue(score > 0.0);
+
+        }
+
+        rs.close();
+        statement.close();
+    }
+
+    @Test
+    public void testUnsupportedOperations() throws Exception {
+        Statement statement = getConnection().createStatement();
+        ResultSet rs = statement.executeQuery(SQL_EMPS);
 
         try {
             rs.getWarnings();
@@ -1633,4 +1668,5 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLException ignore) {}
 
     }
+
 }

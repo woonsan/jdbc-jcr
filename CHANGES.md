@@ -1,6 +1,13 @@
 jdbc-jcr Changelog
 ====================
 
+## jdbc-jcr 0.1.4
+
+Fixed Issues:
+
+* Support ```Connection#isWrapperFor(Class<?>)``` and ```Connection#unwrap(Class<?>)``` with ```JcrConnection``` interface.
+* Support ```ResultSet#isWrapperFor(Class<?>)``` and ```ResultSet#unwrap(Class<?>)``` with ```JcrResultSet``` interface.
+
 ## jdbc-jcr 0.1.3
 
 Fixed Issues:

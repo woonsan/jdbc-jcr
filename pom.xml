@@ -21,7 +21,7 @@
 
   <groupId>com.github.woonsan</groupId>
   <artifactId>jdbc-jcr</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
   <packaging>jar</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>

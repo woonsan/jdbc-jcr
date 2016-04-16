@@ -9,7 +9,7 @@ JDBC Driver for JCR Repository
 
 # Introduction
 
-**jdbc-jcr** provides a JDBC Driver for JCR Repository using **sql** or **JCR2_SQL** query languages.
+**jdbc-jcr** provides a JDBC Driver for JCR Repository using either **sql** (```javax.jcr.query.Query#SQL```) or **JCR2_SQL** (```javax.jcr.query.Query#JCR2_SQL```) query languages.
 
 # How to Add this module in my Project
 
@@ -166,4 +166,32 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
             pstmt.close();
             conn.close();
         }
+```
+
+# Meta-columns support
+
+```ResultSet``` supports four meta-columns: **jcr:path**, **jcr:name**, **jcr:uuid** and **jcr:score**.
+So, you can read the values of the meta-columns like the following example:
+
+```java
+            String path = rs.getString("jcr:path");
+            String name = rs.getString("jcr:name");
+            String uuid = rs.getString("jcr:uuid");
+            double score = rs.getDouble("jcr:score");
+```
+
+# How to access JCR ```Session``` from ```Connection```
+
+```java
+            Connection conn = getConnection();
+            JcrConnection jconn = conn.unwrap(JcrConnection.class);
+            Session jcrSession = jconn.getSession();
+```
+
+# How to access JCR ```Node``` from ```ResultSet```
+
+```java
+            ResultSet rs = stmt.executeQuery(sql);
+            JcrResultSet jrs = rs.unwrap(JcrResultSet.class);
+            Node node = jrs.getCurrentRow().getNode();
 ```

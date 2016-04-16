@@ -41,7 +41,9 @@ import java.util.concurrent.Executor;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
-public class JcrJdbcConnection implements Connection {
+import com.github.woonsan.jdbc.jcr.JcrConnection;
+
+public class JcrJdbcConnection implements JcrConnection {
 
     private Session jcrSession;
 
@@ -59,13 +61,30 @@ public class JcrJdbcConnection implements Connection {
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException();
+    public Session getSession() {
+        return jcrSession;
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException();
+        if (iface == null) {
+            throw new IllegalArgumentException("Interface cannot be null.");
+        }
+
+        return iface.isAssignableFrom(JcrConnection.class);
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        if (iface == null) {
+            throw new IllegalArgumentException("Interface cannot be null.");
+        }
+
+        if (!isWrapperFor(iface)) {
+            throw new SQLException("Not a wrapper for " + iface.getName());
+        }
+
+        return (T) this;
     }
 
     @Override

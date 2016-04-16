@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.jcr.query.Row;
+import javax.jcr.query.RowIterator;
 
 /**
  * JCR Query Result based {@link ResultSet} interface.
@@ -29,8 +30,8 @@ import javax.jcr.query.Row;
 public interface JcrResultSet extends ResultSet {
 
     /**
-     * Returns the current {@link Row} instance from the underlying {@link RowInterator} of the backed JCR Query Result.
-     * @return the current {@link Row} instance from the underlying {@link RowInterator} of the backed JCR Query Result
+     * Returns the current {@link Row} instance from the underlying {@link RowIterator} of the backed JCR Query Result.
+     * @return the current {@link Row} instance from the underlying {@link RowIterator} of the backed JCR Query Result
      * @throws SQLException if current row is not available
      */
     public Row getCurrentRow() throws SQLException;

@@ -7,7 +7,7 @@ How to Release
 
   For example,
 
-        git flow feature start release/1.1 develop
+        git flow feature start 1.1 develop
 
 ## Publish the release branch
 
@@ -15,7 +15,7 @@ How to Release
 
   For example,
 
-        git flow release publish release/1.1
+        git flow release publish 1.1
 
 ## Finish the release
 
@@ -23,7 +23,7 @@ How to Release
 
   For example,
 
-        git flow release finish release/1.1
+        git flow release finish 1.1
 
 ## Deploy the release
 

@@ -193,5 +193,5 @@ So, you can read the values of the meta-columns like the following example:
 ```java
             ResultSet rs = stmt.executeQuery(sql);
             JcrResultSet jrs = rs.unwrap(JcrResultSet.class);
-            Node node = jrs.getCurrentNode();
+            Node node = jrs.getCurrentRow().getNode();
 ```

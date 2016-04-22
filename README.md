@@ -84,14 +84,14 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
 
         // SQL statement example:
         //final String sql1 =
-        //    "SELECT empno, ename, salary, hiredate "
+        //    "SELECT empno, ename, salary, hiredate, nicknames "
         //    + "FROM nt:unstructured "
         //    + "WHERE jcr:path like '/testdatafolder/%' "
         //    + "ORDER BY empno ASC";
 
         // JCR2_SQL statement example:
         final String sql1 =
-            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
+            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate, e.[nicknames] AS nicknames "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('/testdatafolder') "
             + "ORDER BY e.[empno] ASC";
@@ -112,13 +112,14 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
             String ename;
             double salary;
             Date hireDate;
+            String [] nicknames;
 
             System.out.println();
-            System.out.println("==================================================");
-            System.out.println("   empno        ename      salary       hire_date");
-            System.out.println("==================================================");
+            System.out.println("===================================================================");
+            System.out.println("   empno        ename      salary       hire_date       nicknames");
+            System.out.println("===================================================================");
 
-            final String rowFormat = "%8d\t%s\t%8.2f\t%s";
+            final String rowFormat = "%8d\t%s\t%8.2f\t%s\t%s";
 
             while (rs.next()) {
                 ++i;
@@ -126,9 +127,11 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
                 ename = rs.getString(2);
                 salary = rs.getDouble(3);
                 hireDate = rs.getDate(4);
+                nicknames = (String []) rs.getArray(5).getArray();
 
                 System.out.println(String.format(rowFormat, empno, ename, salary,
-                        new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
+                        new SimpleDateFormat("yyyy-MM-dd").format(hireDate),
+                        StringUtils.join(nicknames, ",")));
             }
 
             System.out.println("==================================================");
@@ -142,7 +145,7 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
 
         // SQL statement example:
         //final String sql2 =
-        //    "SELECT empno, ename, salary, hiredate "
+        //    "SELECT empno, ename, salary, hiredate, nicknames "
         //    + "FROM nt:unstructured "
         //    + "WHERE jcr:path like '/testdatafolder/%' "
         //    + "AND salary > ? "
@@ -150,7 +153,7 @@ It assumes there is a JNDI resource (```jcr/repository```) as ```javax.jcr.Repos
 
         // JCR2_SQL statement example:
         final String sql2 =
-            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate "
+            "SELECT e.[empno] AS empno, e.[ename] AS ename, e.[salary] AS salary, e.[hiredate] AS hiredate, e.[nicknames] AS nicknames "
             + "FROM [nt:unstructured] AS e "
             + "WHERE ISDESCENDANTNODE('/testdatafolder') "
             + "AND e.[salary] > ? "

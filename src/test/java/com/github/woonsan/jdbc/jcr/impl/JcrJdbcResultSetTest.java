@@ -18,6 +18,7 @@
  */
 package com.github.woonsan.jdbc.jcr.impl;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -53,12 +54,12 @@ import com.github.woonsan.jdbc.jcr.JcrResultSet;
 public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
     private static final String SQL_EMPS =
-            "SELECT empno, ename, salary, hiredate "
+            "SELECT empno, ename, salary, hiredate, nicknames "
             + "FROM nt:unstructured "
             + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
             + "ORDER BY empno ASC";
 
-    private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
+    private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s\t%s";
 
     private static final String NODE_INFO_OUT_FORMAT = "\t--> %s, %s (%s), %f";
 
@@ -123,7 +124,7 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         ResultSetMetaData metaData = rs.getMetaData();
 
         // When 'sql' query used, jcr adds 'jcr:path' and 'jcr:score' columns automatically.
-        assertEquals(4 + Constants.META_COLUMNS.size(), metaData.getColumnCount());
+        assertEquals(5 + Constants.META_COLUMNS.size(), metaData.getColumnCount());
 
         assertEquals("empno", metaData.getColumnName(1));
         assertEquals("ename", metaData.getColumnName(2));
@@ -880,16 +881,6 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
-            rs.getArray(1);
-            fail();
-        } catch (SQLFeatureNotSupportedException ignore) {}
-
-        try {
-            rs.getArray("col1");
-            fail();
-        } catch (SQLFeatureNotSupportedException ignore) {}
-
-        try {
             rs.getURL(1);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
@@ -1190,13 +1181,15 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         int count = 0;
         long empno, empno2;
         String ename, ename2;
+        String [] nicknames;
+        String [] nicknames2;
         double salary, salary2;
         Date hireDate, hireDate2;
 
         System.out.println();
-        System.out.println("==================================================");
-        System.out.println("   empno        ename      salary       hire_date");
-        System.out.println("==================================================");
+        System.out.println("===================================================================");
+        System.out.println("   empno        ename      salary       hire_date       nicknames");
+        System.out.println("===================================================================");
 
         while (rs.next()) {
             ++count;
@@ -1222,6 +1215,9 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             hireDate = rs.getDate(4);
             hireDate2 = rs.getDate("hiredate");
             assertEquals(hireDate, hireDate2);
+            nicknames = (String []) rs.getArray(5).getArray();
+            nicknames2 = (String []) rs.getArray("nicknames").getArray();
+            assertArrayEquals(nicknames, nicknames2);
 
             String nodeName = rs.getString(Constants.COLUMN_JCR_NAME);
             assertEquals("testdata-" + count, nodeName);
@@ -1234,7 +1230,7 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             assertNonExistingColumn(rs);
 
             System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
-                    new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
+                    new SimpleDateFormat("yyyy-MM-dd").format(hireDate), join(nicknames, ",")));
             System.out.println(String.format(NODE_INFO_OUT_FORMAT, rs.getString("jcr:uuid"), rs.getString("jcr:name"),
                     rs.getString("jcr:path"), rs.getDouble("jcr:score")));
 
@@ -1669,4 +1665,14 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
     }
 
+    private String join(String [] a, String delim) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < a.length; i++) {
+            if (i != 0) { sb.append(delim); }
+            sb.append(a[i]);
+        }
+
+        return sb.toString();
+    }
 }

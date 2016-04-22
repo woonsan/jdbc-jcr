@@ -99,6 +99,7 @@ public class AbstractRepositoryEnabledTestCase {
             dataNode.setProperty("ename", "Name' " + i);
             dataNode.setProperty("salary", 100000.0 + i);
             dataNode.setProperty("hiredate", empHireDate);
+            dataNode.setProperty("nicknames", new String [] { "Nickname' " + i + ".1", "Nickname' " + i + ".2" });
         }
     }
 

@@ -1358,6 +1358,10 @@ class JcrJdbcResultSet implements JcrResultSet {
         throw new SQLFeatureNotSupportedException();
     }
 
+    protected Value getColumnValue(final Row row, final String columnName) throws SQLException, RepositoryException {
+        return row.getValue(columnName);
+    }
+
     private String findColumnName(int columnIndex) throws SQLException {
         final int columnCount = columnNames != null ? columnNames.length : 0;
 
@@ -1366,10 +1370,6 @@ class JcrJdbcResultSet implements JcrResultSet {
         }
 
         return columnNames[columnIndex - 1];
-    }
-
-    private Value getColumnValue(final Row row, final String columnName) throws SQLException, RepositoryException {
-        return row.getValue(columnName);
     }
 
 }

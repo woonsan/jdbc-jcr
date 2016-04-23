@@ -18,6 +18,9 @@
  */
 package com.github.woonsan.jdbc.jcr.impl;
 
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,8 +47,12 @@ import java.util.Calendar;
 import java.util.Map;
 
 import javax.jcr.Node;
+import javax.jcr.Value;
 import javax.jcr.query.QueryResult;
+import javax.jcr.query.Row;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.jackrabbit.value.BinaryValue;
 import org.junit.Test;
 
 import com.github.woonsan.jdbc.jcr.Constants;
@@ -147,6 +154,81 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
         rs.close();
         statement.close();
+    }
+
+    @Test
+    public void testGetBytes() throws Exception {
+        final Value value = new BinaryValue("Hello, World!");
+
+        final Statement statement = createNiceMock(Statement.class);
+        replay(statement);
+
+        final QueryResult result = createNiceMock(QueryResult.class);
+        expect(result.getColumnNames()).andReturn(new String [] { "mock_binary_column" }).anyTimes();
+        replay(result);
+
+        final JcrJdbcResultSet rs = new JcrJdbcResultSet(statement, result) {
+            @Override
+            public Row getCurrentRow() {
+                return null;
+            }
+            @Override
+            protected Value getColumnValue(Row row, String columnLabel) {
+                return value;
+            }
+        };
+
+        assertEquals("Hello, World!", new String(rs.getBytes("mock_binary_column")));
+    }
+
+    @Test
+    public void testGetBinaryStream() throws Exception {
+        final Value value = new BinaryValue("Hello, World!");
+
+        final Statement statement = createNiceMock(Statement.class);
+        replay(statement);
+
+        final QueryResult result = createNiceMock(QueryResult.class);
+        expect(result.getColumnNames()).andReturn(new String [] { "mock_binary_column" }).anyTimes();
+        replay(result);
+
+        final JcrJdbcResultSet rs = new JcrJdbcResultSet(statement, result) {
+            @Override
+            public Row getCurrentRow() {
+                return null;
+            }
+            @Override
+            protected Value getColumnValue(Row row, String columnLabel) {
+                return value;
+            }
+        };
+
+        assertEquals("Hello, World!", IOUtils.toString(rs.getBinaryStream("mock_binary_column")));
+    }
+
+    @Test
+    public void testGetCharacterStream() throws Exception {
+        final Value value = new BinaryValue("Hello, World!");
+
+        final Statement statement = createNiceMock(Statement.class);
+        replay(statement);
+
+        final QueryResult result = createNiceMock(QueryResult.class);
+        expect(result.getColumnNames()).andReturn(new String [] { "mock_binary_column" }).anyTimes();
+        replay(result);
+
+        final JcrJdbcResultSet rs = new JcrJdbcResultSet(statement, result) {
+            @Override
+            public Row getCurrentRow() {
+                return null;
+            }
+            @Override
+            protected Value getColumnValue(Row row, String columnLabel) {
+                return value;
+            }
+        };
+
+        assertEquals("Hello, World!", IOUtils.toString(rs.getCharacterStream("mock_binary_column")));
     }
 
     @SuppressWarnings("deprecation")
@@ -736,7 +818,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateAsciiStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateAsciiStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateAsciiStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -756,7 +848,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateBinaryStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateBinaryStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateBinaryStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -776,7 +878,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateCharacterStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateCharacterStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateCharacterStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1026,7 +1138,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateNCharacterStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateNCharacterStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateNCharacterStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1036,7 +1158,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateAsciiStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateAsciiStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateAsciiStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1046,7 +1178,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateBinaryStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateBinaryStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateBinaryStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1056,7 +1198,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateCharacterStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateCharacterStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateCharacterStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 

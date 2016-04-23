@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jcr.Binary;
+import javax.jcr.Node;
+import javax.jcr.Property;
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
@@ -1004,7 +1006,22 @@ class JcrJdbcResultSet implements JcrResultSet {
 
     @Override
     public Array getArray(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        if (isClosed()) {
+            throw new SQLException("ResultSet was already closed.");
+        }
+
+        try {
+            final Node node = getCurrentRow().getNode();
+
+            if (node.hasProperty(columnLabel)) {
+                final Property prop = node.getProperty(columnLabel);
+                return new JcrValuesArray(prop);
+            } else {
+                throw new SQLException("Property doesn't exist by the column label.");
+            }
+        } catch (RepositoryException e) {
+            throw new SQLException("Failed to retrieve property by the column label.", e);
+        }
     }
 
     @Override
@@ -1341,6 +1358,10 @@ class JcrJdbcResultSet implements JcrResultSet {
         throw new SQLFeatureNotSupportedException();
     }
 
+    protected Value getColumnValue(final Row row, final String columnName) throws SQLException, RepositoryException {
+        return row.getValue(columnName);
+    }
+
     private String findColumnName(int columnIndex) throws SQLException {
         final int columnCount = columnNames != null ? columnNames.length : 0;
 
@@ -1351,7 +1372,4 @@ class JcrJdbcResultSet implements JcrResultSet {
         return columnNames[columnIndex - 1];
     }
 
-    private Value getColumnValue(final Row row, final String columnName) throws SQLException, RepositoryException {
-        return row.getValue(columnName);
-    }
 }

@@ -18,6 +18,10 @@
  */
 package com.github.woonsan.jdbc.jcr.impl;
 
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -43,8 +47,12 @@ import java.util.Calendar;
 import java.util.Map;
 
 import javax.jcr.Node;
+import javax.jcr.Value;
 import javax.jcr.query.QueryResult;
+import javax.jcr.query.Row;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.jackrabbit.value.BinaryValue;
 import org.junit.Test;
 
 import com.github.woonsan.jdbc.jcr.Constants;
@@ -53,12 +61,12 @@ import com.github.woonsan.jdbc.jcr.JcrResultSet;
 public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
     private static final String SQL_EMPS =
-            "SELECT empno, ename, salary, hiredate "
+            "SELECT empno, ename, salary, hiredate, nicknames "
             + "FROM nt:unstructured "
             + "WHERE jcr:path like '" + TEST_DATE_NODE_PATH + "/%' "
             + "ORDER BY empno ASC";
 
-    private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s";
+    private static final String REC_OUT_FORMAT = "%8d\t%s\t%8.2f\t%s\t%s";
 
     private static final String NODE_INFO_OUT_FORMAT = "\t--> %s, %s (%s), %f";
 
@@ -123,7 +131,7 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         ResultSetMetaData metaData = rs.getMetaData();
 
         // When 'sql' query used, jcr adds 'jcr:path' and 'jcr:score' columns automatically.
-        assertEquals(4 + Constants.META_COLUMNS.size(), metaData.getColumnCount());
+        assertEquals(5 + Constants.META_COLUMNS.size(), metaData.getColumnCount());
 
         assertEquals("empno", metaData.getColumnName(1));
         assertEquals("ename", metaData.getColumnName(2));
@@ -146,6 +154,81 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
         rs.close();
         statement.close();
+    }
+
+    @Test
+    public void testGetBytes() throws Exception {
+        final Value value = new BinaryValue("Hello, World!");
+
+        final Statement statement = createNiceMock(Statement.class);
+        replay(statement);
+
+        final QueryResult result = createNiceMock(QueryResult.class);
+        expect(result.getColumnNames()).andReturn(new String [] { "mock_binary_column" }).anyTimes();
+        replay(result);
+
+        final JcrJdbcResultSet rs = new JcrJdbcResultSet(statement, result) {
+            @Override
+            public Row getCurrentRow() {
+                return null;
+            }
+            @Override
+            protected Value getColumnValue(Row row, String columnLabel) {
+                return value;
+            }
+        };
+
+        assertEquals("Hello, World!", new String(rs.getBytes("mock_binary_column")));
+    }
+
+    @Test
+    public void testGetBinaryStream() throws Exception {
+        final Value value = new BinaryValue("Hello, World!");
+
+        final Statement statement = createNiceMock(Statement.class);
+        replay(statement);
+
+        final QueryResult result = createNiceMock(QueryResult.class);
+        expect(result.getColumnNames()).andReturn(new String [] { "mock_binary_column" }).anyTimes();
+        replay(result);
+
+        final JcrJdbcResultSet rs = new JcrJdbcResultSet(statement, result) {
+            @Override
+            public Row getCurrentRow() {
+                return null;
+            }
+            @Override
+            protected Value getColumnValue(Row row, String columnLabel) {
+                return value;
+            }
+        };
+
+        assertEquals("Hello, World!", IOUtils.toString(rs.getBinaryStream("mock_binary_column")));
+    }
+
+    @Test
+    public void testGetCharacterStream() throws Exception {
+        final Value value = new BinaryValue("Hello, World!");
+
+        final Statement statement = createNiceMock(Statement.class);
+        replay(statement);
+
+        final QueryResult result = createNiceMock(QueryResult.class);
+        expect(result.getColumnNames()).andReturn(new String [] { "mock_binary_column" }).anyTimes();
+        replay(result);
+
+        final JcrJdbcResultSet rs = new JcrJdbcResultSet(statement, result) {
+            @Override
+            public Row getCurrentRow() {
+                return null;
+            }
+            @Override
+            protected Value getColumnValue(Row row, String columnLabel) {
+                return value;
+            }
+        };
+
+        assertEquals("Hello, World!", IOUtils.toString(rs.getCharacterStream("mock_binary_column")));
     }
 
     @SuppressWarnings("deprecation")
@@ -735,7 +818,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateAsciiStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateAsciiStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateAsciiStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -755,7 +848,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateBinaryStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateBinaryStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateBinaryStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -775,7 +878,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateCharacterStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateCharacterStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateCharacterStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -876,16 +989,6 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
         try {
             rs.getClob("col1");
-            fail();
-        } catch (SQLFeatureNotSupportedException ignore) {}
-
-        try {
-            rs.getArray(1);
-            fail();
-        } catch (SQLFeatureNotSupportedException ignore) {}
-
-        try {
-            rs.getArray("col1");
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1035,7 +1138,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateNCharacterStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateNCharacterStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateNCharacterStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1045,7 +1158,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateAsciiStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateAsciiStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateAsciiStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1055,7 +1178,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateBinaryStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateBinaryStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateBinaryStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1065,7 +1198,17 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         } catch (SQLFeatureNotSupportedException ignore) {}
 
         try {
+            rs.updateCharacterStream(1, null, (long) 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
             rs.updateCharacterStream("col1", null, 0);
+            fail();
+        } catch (SQLFeatureNotSupportedException ignore) {}
+
+        try {
+            rs.updateCharacterStream("col1", null, (long) 0);
             fail();
         } catch (SQLFeatureNotSupportedException ignore) {}
 
@@ -1190,13 +1333,15 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
         int count = 0;
         long empno, empno2;
         String ename, ename2;
+        String [] nicknames;
+        String [] nicknames2;
         double salary, salary2;
         Date hireDate, hireDate2;
 
         System.out.println();
-        System.out.println("==================================================");
-        System.out.println("   empno        ename      salary       hire_date");
-        System.out.println("==================================================");
+        System.out.println("===================================================================");
+        System.out.println("   empno        ename      salary       hire_date       nicknames");
+        System.out.println("===================================================================");
 
         while (rs.next()) {
             ++count;
@@ -1222,6 +1367,9 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             hireDate = rs.getDate(4);
             hireDate2 = rs.getDate("hiredate");
             assertEquals(hireDate, hireDate2);
+            nicknames = (String []) rs.getArray(5).getArray();
+            nicknames2 = (String []) rs.getArray("nicknames").getArray();
+            assertArrayEquals(nicknames, nicknames2);
 
             String nodeName = rs.getString(Constants.COLUMN_JCR_NAME);
             assertEquals("testdata-" + count, nodeName);
@@ -1234,7 +1382,7 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
             assertNonExistingColumn(rs);
 
             System.out.println(String.format(REC_OUT_FORMAT, empno, ename, salary,
-                    new SimpleDateFormat("yyyy-MM-dd").format(hireDate)));
+                    new SimpleDateFormat("yyyy-MM-dd").format(hireDate), join(nicknames, ",")));
             System.out.println(String.format(NODE_INFO_OUT_FORMAT, rs.getString("jcr:uuid"), rs.getString("jcr:name"),
                     rs.getString("jcr:path"), rs.getDouble("jcr:score")));
 
@@ -1669,4 +1817,14 @@ public class JcrJdbcResultSetTest extends AbstractRepositoryEnabledTestCase {
 
     }
 
+    private String join(String [] a, String delim) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < a.length; i++) {
+            if (i != 0) { sb.append(delim); }
+            sb.append(a[i]);
+        }
+
+        return sb.toString();
+    }
 }

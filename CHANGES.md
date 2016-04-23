@@ -1,6 +1,12 @@
 jdbc-jcr Changelog
 ====================
 
+## jdbc-jcr 0.1.5
+
+Fixed Issues:
+
+* Support ```ResultSet#getArray(...)``` on multi-value property column.
+
 ## jdbc-jcr 0.1.4
 
 Fixed Issues:

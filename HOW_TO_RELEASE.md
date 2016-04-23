@@ -7,7 +7,7 @@ How to Release
 
   For example,
 
-        git flow feature start 1.1 develop
+        git flow release start 1.1 develop
 
 ## Publish the release branch
 
